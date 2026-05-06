@@ -1,0 +1,492 @@
+/* FORZAR QUE TODO OCUPE TODA LA PANTALLA */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    background-color: #f0f2f5;
+}
+
+/* Contenedor principal - OCUPA TODA LA PANTALLA */
+.container {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f2f5;
+    box-sizing: border-box;
+}
+
+/* Header */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e0e0e0;
+    flex-wrap: wrap;
+    gap: 10px;
+    background-color: white;
+    padding: 15px 20px;
+    border-radius: 12px;
+}
+
+.header p {
+    margin: 0;
+    font-size: 16px;
+}
+
+.header button {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    width: auto;
+}
+
+.header button:hover {
+    background: #c82333;
+}
+
+/* Títulos */
+h1 {
+    color: #1a73e8;
+    margin-bottom: 5px;
+    padding: 0 10px;
+}
+
+h2 {
+    color: #1a73e8;
+    margin: 30px 0 15px 0;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 10px;
+    padding-left: 10px;
+}
+
+h3 {
+    color: #1a73e8;
+    margin: 0 0 15px 0;
+}
+
+/* Botones generales */
+button {
+    background: #1a73e8;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 10px 0;
+    width: auto;
+    font-size: 14px;
+}
+
+button:hover {
+    background: #1557b0;
+}
+
+/* Tarjetas de formulario */
+.form-card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin: 20px 0;
+}
+
+.form-card h3 {
+    margin: 0 0 15px;
+    color: #1a73e8;
+}
+
+.form-card input, 
+.form-card select, 
+.form-card textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.form-card textarea {
+    resize: vertical;
+}
+
+.form-card button {
+    width: 100%;
+    background: #28a745;
+}
+
+.form-card button:hover {
+    background: #218838;
+}
+
+/* Contenedor de tablas - OCUPA TODO EL ANCHO */
+.table-container {
+    width: 100%;
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    box-sizing: border-box;
+}
+
+/* Tabla - OCUPA TODO EL ANCHO */
+.tabla {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: auto;
+}
+
+.tabla th, 
+.tabla td {
+    padding: 12px 10px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+    white-space: normal;
+    word-break: break-word;
+    vertical-align: top;
+}
+
+/* Anchos de columnas para pacientes */
+.tabla-pacientes th:nth-child(1) { width: 18%; }
+.tabla-pacientes th:nth-child(2) { width: 18%; }
+.tabla-pacientes th:nth-child(3) { width: 12%; }
+.tabla-pacientes th:nth-child(4) { width: 12%; }
+.tabla-pacientes th:nth-child(5) { width: 28%; }
+.tabla-pacientes th:nth-child(6) { width: 12%; }
+
+/* ========== TABLA DE MÉDICOS ========== */
+.tabla-medicos th:nth-child(1) { width: 20%; }  /* Nombre */
+.tabla-medicos th:nth-child(2) { width: 20%; }  /* Email */
+.tabla-medicos th:nth-child(3) { width: 15%; }  /* Especialidad */
+.tabla-medicos th:nth-child(4) { width: 15%; }  /* Teléfono */
+.tabla-medicos th:nth-child(5) { width: 15%; }  /* Estado */
+.tabla-medicos th:nth-child(6) { width: 15%; }  /* Acciones */
+
+.tabla-medicos td .acciones-botones {
+    display: flex;
+    gap: 5px;
+    flex-wrap: nowrap;
+}
+
+.tabla-medicos td .acciones-botones button {
+    padding: 4px 8px;
+    font-size: 12px;
+    margin: 0;
+    width: auto;
+}
+
+.tabla-medicos td .acciones-botones button:first-child {
+    background: #ffc107;
+    color: #000;
+}
+
+.tabla-medicos td .acciones-botones button:first-child:hover {
+    background: #e0a800;
+}
+
+.tabla-medicos td .acciones-botones button:last-child {
+    background: #dc3545;
+}
+
+.tabla-medicos td .acciones-botones button:last-child:hover {
+    background: #c82333;
+}
+
+/* Anchos de columnas para citas */
+.tabla-citas th:nth-child(1) { width: 20%; }
+.tabla-citas th:nth-child(2) { width: 20%; }
+.tabla-citas th:nth-child(3) { width: 20%; }
+.tabla-citas th:nth-child(4) { width: 10%; }
+.tabla-citas th:nth-child(5) { width: 15%; }
+.tabla-citas th:nth-child(6) { width: 15%; }
+
+/* Anchos de columnas para cobranza */
+.tabla-cobranza th:nth-child(1) { width: 12%; }  /* Paciente */
+.tabla-cobranza th:nth-child(2) { width: 12%; }  /* Médico */
+.tabla-cobranza th:nth-child(3) { width: 15%; }  /* Concepto */
+.tabla-cobranza th:nth-child(4) { width: 8%; }   /* Monto */
+.tabla-cobranza th:nth-child(5) { width: 8%; }   /* Pagado */
+.tabla-cobranza th:nth-child(6) { width: 8%; }   /* Saldo */
+.tabla-cobranza th:nth-child(7) { width: 10%; }  /* Estado */
+.tabla-cobranza th:nth-child(8) { width: 7%; }   /* Acciones */
+
+/* Anchos de columnas para resumen */
+.tabla-resumen th:nth-child(1) { width: 30%; }  /* Paciente */
+.tabla-resumen th:nth-child(2) { width: 10%; }  /* Deudas */
+.tabla-resumen th:nth-child(3) { width: 15%; }  /* Total */
+.tabla-resumen th:nth-child(4) { width: 15%; }  /* Pagado */
+.tabla-resumen th:nth-child(5) { width: 15%; }  /* Saldo */
+
+/* Anchos de columnas para servicios */
+.tabla-servicios th:nth-child(1) { width: 25%; }
+.tabla-servicios th:nth-child(2) { width: 35%; }
+.tabla-servicios th:nth-child(3) { width: 15%; }
+.tabla-servicios th:nth-child(4) { width: 10%; }
+.tabla-servicios th:nth-child(5) { width: 15%; }
+
+.tabla th {
+    background: #f8f9fa;
+    color: #5f6368;
+    font-weight: 600;
+}
+
+.tabla td button {
+    background: #dc3545;
+    padding: 5px 10px;
+    font-size: 12px;
+    margin: 0;
+    width: auto;
+}
+
+.tabla td button:hover {
+    background: #c82333;
+}
+
+/* Paginación */
+.paginacion {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.paginacion button {
+    background: #1a73e8;
+    padding: 8px 16px;
+    margin: 0;
+    width: auto;
+}
+
+.paginacion button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.paginacion span {
+    padding: 8px 16px;
+    background: #f8f9fa;
+    border-radius: 5px;
+    color: #333;
+}
+
+/* Estados de citas */
+.estado {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: capitalize;
+}
+
+.estado.pendiente {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.estado.confirmada {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.estado.cancelada {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+.estado.completada {
+    background-color: #17a2b8;
+    color: #fff;
+}
+
+/* Tarjetas para móvil */
+.tarjetas-lista {
+    display: none;
+    gap: 15px;
+    flex-direction: column;
+}
+
+.tarjeta-item {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+}
+
+.tarjeta-item .campo {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.tarjeta-item .campo:last-child {
+    border-bottom: none;
+}
+
+.tarjeta-item .label {
+    font-weight: bold;
+    color: #5f6368;
+}
+
+.tarjeta-item .valor {
+    color: #333;
+    word-break: break-word;
+}
+
+.tarjeta-item .acciones {
+    margin-top: 10px;
+    text-align: right;
+    padding-top: 10px;
+    border-top: 1px solid #ddd;
+}
+
+.tarjeta-item .acciones button {
+    background: #dc3545;
+    padding: 6px 12px;
+    font-size: 12px;
+    margin: 0;
+    width: auto;
+}
+
+.mensaje-vacio {
+    text-align: center;
+    padding: 40px;
+    color: #5f6368;
+    font-size: 16px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 1024px) {
+    .table-container {
+        overflow-x: auto;
+    }
+    
+    .tabla {
+        min-width: 800px;
+    }
+    
+    .tabla th, 
+    .tabla td {
+        white-space: nowrap;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+    
+    .header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .header button {
+        width: 100%;
+    }
+    
+    button {
+        width: 100%;
+    }
+    
+    .form-card button {
+        width: 100%;
+    }
+    
+    .paginacion button {
+        width: auto;
+    }
+    
+    .tabla {
+        display: none;
+    }
+    
+    .tarjetas-lista {
+        display: flex;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .tarjeta-item {
+        padding: 12px;
+    }
+    
+    .tarjeta-item .campo {
+        grid-template-columns: 1fr;
+        gap: 5px;
+    }
+    
+    .tarjeta-item .valor {
+        padding-left: 10px;
+    }
+    
+    h1 {
+        font-size: 24px;
+    }
+    
+    h2 {
+        font-size: 20px;
+    }
+}
+
+/* ========== MODAL ========== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    max-width: 700px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.modal-content h3, .modal-content h4 {
+    margin-top: 0;
+    color: #1a73e8;
+}
+
+.modal-content .form-card {
+    margin: 0;
+    padding: 15px;
+}
+
+/* Botones pequeños en tabla */
+.tabla td button {
+    margin: 2px;
+    padding: 5px 8px;
+    font-size: 12px;
+}
