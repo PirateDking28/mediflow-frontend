@@ -659,21 +659,6 @@ function Dashboard() {
         }
     };
 
-    const actualizarServicio = async (e) => {
-        e.preventDefault();
-        try {
-            await api.put(`/servicios/${servicioEditando.id}`, formServicio);
-            alert('Servicio actualizado exitosamente');
-            setServicioEditando(null);
-            setFormServicio({ nombre: '', descripcion: '', precio: '' });
-            cargarServiciosCatalogo();
-            cargarServiciosDisponibles();
-        } catch (error) {
-            console.error(error);
-            alert(error.response?.data?.error || 'Error al actualizar servicio');
-        }
-    };
-
     const eliminarServicio = async (id) => {
         if (!window.confirm('¿Desactivar este servicio?')) return;
         try {
@@ -862,14 +847,6 @@ function Dashboard() {
                                             <td>{s.cantidad}</td>
                                             <td>${parseFloat(s.precio_unitario).toFixed(2)}</td>
                                             <td>${parseFloat(s.subtotal).toFixed(2)}</td>
-                                            <td><div className="acciones-botones">
-                                                <button onClick={() => abrirModalEditarServicio(servicio)} title="Editar servicio">✏️</button>
-                                                {servicio.activo ? (
-                                                    <button onClick={() => eliminarServicio(servicio.id)} title="Desactivar servicio">🗑️</button>
-                                                ) : (
-                                                    <button onClick={() => activarServicio(servicio.id)} title="Reactivar servicio">🔄</button>
-                                                )}
-                                            </div></td>
                                         </tr>
                                     ))
                                 )}
@@ -1017,22 +994,21 @@ function Dashboard() {
                                             <td>${parseFloat(servicio.precio).toFixed(2)}</td>
                                             <td className={servicio.activo ? 'estado confirmada' : 'estado cancelada'}>
                                                 {servicio.activo ? 'Activo' : 'Inactivo'}
-                                            </td>
-                                            <td>
-                                                <div className="acciones-botones">
-                                                    {servicio.activo ? (
-                                                        <button onClick={() => eliminarServicio(servicio.id)} title="Desactivar servicio">🗑️</button>
-                                                    ) : (
-                                                        <button onClick={() => activarServicio(servicio.id)} title="Reactivar servicio">🔄</button>
-                                                    )}
-                                                </div>
-                                            </td>
+                                                </td>
+                                                <td>
+                                                    <div className="acciones-botones">
+                                                        {servicio.activo ? (
+                                                            <button onClick={() => eliminarServicio(servicio.id)} title="Desactivar servicio">🗑️</button>
+                                                        ) : (
+                                                            <button onClick={() => activarServicio(servicio.id)} title="Reactivar servicio">🔄</button>
+                                                        )}
+                                                    </div>
+                                                </td>
                                         </tr>
                                     ))
                                 )}
                             </tbody>
                         </table>
-                        {totalPaginasServicios > 1 && <div className="paginacion">...</div>}
                     </div>
                 </>
             )}
