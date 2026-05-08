@@ -103,7 +103,6 @@ function Dashboard() {
     const itemsPorPagina = 10;
 
     const navigate = useNavigate();
-    const [showModalServicio, setShowModalServicio] = useState(false);
 
     // ========== CONSTANTES DE ROL ==========
     const esAdminOSecretaria = usuario?.rol === 'admin' || usuario?.rol === 'secretaria';
