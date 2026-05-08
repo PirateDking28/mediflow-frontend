@@ -102,6 +102,9 @@ function Dashboard() {
 
     const navigate = useNavigate();
 
+    const [servicioEditando, setServicioEditando] = useState(null);
+    const [showModalServicio, setShowModalServicio] = useState(false);
+
     // ========== CONSTANTES DE ROL ==========
     const esAdminOSecretaria = usuario?.rol === 'admin' || usuario?.rol === 'secretaria';
     const esAdmin = usuario?.rol === 'admin';
@@ -196,6 +199,45 @@ function Dashboard() {
             setHorariosDisponibles([]);
         } finally {
             setCargandoHorarios(false);
+        }
+    };
+
+    const abrirModalEditarServicio = (servicio) => {
+        setServicioEditando(servicio);
+        setFormServicio({
+            nombre: servicio.nombre,
+            descripcion: servicio.descripcion || '',
+            precio: servicio.precio
+        });
+        setShowModalServicio(true);
+    };
+
+    const actualizarServicio = async (e) => {
+        e.preventDefault();
+        try {
+            await api.put(`/servicios/${servicioEditando.id}`, formServicio);
+            alert('Servicio actualizado exitosamente');
+            setShowModalServicio(false);
+            setServicioEditando(null);
+            setFormServicio({ nombre: '', descripcion: '', precio: '' });
+            cargarServicios();
+            cargarServiciosDisponibles();
+        } catch (error) {
+            console.error(error);
+            alert(error.response?.data?.error || 'Error al actualizar servicio');
+        }
+    };
+
+    const activarServicio = async (id) => {
+        if (!window.confirm('¿Activar este servicio nuevamente?')) return;
+        try {
+            await api.put(`/servicios/${id}/activar`);
+            alert('Servicio activado');
+            cargarServicios();
+            cargarServiciosDisponibles();
+        } catch (error) {
+            console.error(error);
+            alert(error.response?.data?.error || 'Error al activar servicio');
         }
     };
 
@@ -963,23 +1005,42 @@ function Dashboard() {
                         <h3>Lista de Servicios</h3>
                         <table className="tabla tabla-servicios">
                             <thead>
-                                <tr><th>Nombre</th><th>Descripción</th><th>Precio</th><th>Estado</th><th>Acciones</th></tr>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Descripción</th>
+                                    <th>Precio</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
                             </thead>
                             <tbody>
-                                {serviciosPaginados.length === 0 ? <tr><td colSpan="5">No hay servicios registrados</td></tr> :
+                                {serviciosPaginados.length === 0 ? (
+                                    <tr><td colSpan="5">No hay servicios registrados</td></tr>
+                                ) : (
                                     serviciosPaginados.map(servicio => (
                                         <tr key={servicio.id}>
                                             <td>{servicio.nombre}</td>
                                             <td>{servicio.descripcion}</td>
                                             <td>${parseFloat(servicio.precio).toFixed(2)}</td>
-                                            <td className={servicio.activo ? 'estado confirmada' : 'estado cancelada'}>{servicio.activo ? 'Activo' : 'Inactivo'}</td>
-                                            <td><button onClick={() => eliminarServicio(servicio.id)}>🗑️</button></td>
+                                            <td className={servicio.activo ? 'estado confirmada' : 'estado cancelada'}>
+                                                {servicio.activo ? 'Activo' : 'Inactivo'}
+                                            </td>
+                                            <td>
+                                                <div className="acciones-botones">
+                                                    <button onClick={() => abrirModalEditarServicio(servicio)} title="Editar servicio">✏️</button>
+                                                    {servicio.activo ? (
+                                                        <button onClick={() => eliminarServicio(servicio.id)} title="Desactivar servicio">🗑️</button>
+                                                    ) : (
+                                                        <button onClick={() => activarServicio(servicio.id)} title="Reactivar servicio">🔄</button>
+                                                    )}
+                                                </div>
+                                            </td>
                                         </tr>
                                     ))
-                                }
+                                )}
                             </tbody>
                         </table>
-                        {totalPaginasServicios > 1 && <div className="paginacion"><button onClick={() => setPaginaServicios(1)} disabled={paginaServicios === 1}>«</button><button onClick={() => setPaginaServicios(paginaServicios - 1)} disabled={paginaServicios === 1}>Anterior</button><span>Página {paginaServicios} de {totalPaginasServicios}</span><button onClick={() => setPaginaServicios(paginaServicios + 1)} disabled={paginaServicios === totalPaginasServicios}>Siguiente</button><button onClick={() => setPaginaServicios(totalPaginasServicios)} disabled={paginaServicios === totalPaginasServicios}>»</button></div>}
+                        {totalPaginasServicios > 1 && <div className="paginacion">...</div>}
                     </div>
                 </>
             )}
@@ -1128,7 +1189,7 @@ function Dashboard() {
                                     <td>{paciente.nombre}</td>
                                     <td>{paciente.email || '-'}</td>
                                     <td>{paciente.telefono || '-'}</td>
-                                    <td>{paciente.fecha_nacimiento || '-'}</td>
+                                    <td>{paciente.fecha_nacimiento ? new Date(paciente.fecha_nacimiento).toLocaleDateString() : '-'}</td>
                                     <td>{paciente.direccion || '-'}</td>
                                     <td className={paciente.activo ? 'estado confirmada' : 'estado cancelada'}>
                                         {paciente.activo ? 'Activo' : 'Inactivo'}
@@ -1375,6 +1436,24 @@ function Dashboard() {
             }
         </div >
     );
+
+    {/* Modal de Edición de Servicio */ }
+    {
+        showModalServicio && (
+            <div className="modal-overlay" onClick={() => setShowModalServicio(false)}>
+                <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                    <h3>✏️ Editar Servicio</h3>
+                    <form onSubmit={actualizarServicio}>
+                        <input type="text" placeholder="Nombre del servicio" value={formServicio.nombre} onChange={e => setFormServicio({ ...formServicio, nombre: e.target.value })} required />
+                        <textarea placeholder="Descripción" value={formServicio.descripcion} onChange={e => setFormServicio({ ...formServicio, descripcion: e.target.value })} rows="2" />
+                        <input type="number" step="0.01" placeholder="Precio" value={formServicio.precio} onChange={e => setFormServicio({ ...formServicio, precio: e.target.value })} required />
+                        <button type="submit">Guardar Cambios</button>
+                        <button type="button" onClick={() => setShowModalServicio(false)} style={{ background: '#6c757d', marginTop: '10px' }}>Cancelar</button>
+                    </form>
+                </div>
+            </div>
+        )
+    }
 }
 
 export default Dashboard;
