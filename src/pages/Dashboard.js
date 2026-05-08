@@ -92,7 +92,6 @@ function Dashboard() {
     const [showModalMedico, setShowModalMedico] = useState(false);
     const [pacienteEditando, setPacienteEditando] = useState(null);
     const [showModalPaciente, setShowModalPaciente] = useState(false);
-    const [servicioEditando, setServicioEditando] = useState(null);
     const [showModalServicio, setShowModalServicio] = useState(false);
 
     // Paginación
@@ -198,22 +197,6 @@ function Dashboard() {
             setHorariosDisponibles([]);
         } finally {
             setCargandoHorarios(false);
-        }
-    };
-
-    const actualizarServicio = async (e) => {
-        e.preventDefault();
-        try {
-            await api.put(`/servicios/${servicioEditando.id}`, formServicio);
-            alert('Servicio actualizado exitosamente');
-            setShowModalServicio(false);
-            setServicioEditando(null);
-            setFormServicio({ nombre: '', descripcion: '', precio: '' });
-            cargarServiciosCatalogo();  // ← Cambiado
-            cargarServiciosDisponibles();
-        } catch (error) {
-            console.error(error);
-            alert(error.response?.data?.error || 'Error al actualizar servicio');
         }
     };
 
@@ -677,16 +660,6 @@ function Dashboard() {
         }
     };
 
-    const abrirModalEditarServicio = (servicio) => {
-        setServicioEditando(servicio);
-        setFormServicio({
-            nombre: servicio.nombre,
-            descripcion: servicio.descripcion || '',
-            precio: servicio.precio
-        });
-        setShowModalServicio(true);
-    };
-
     const actualizarServicio = async (e) => {
         e.preventDefault();
         try {
@@ -1049,7 +1022,6 @@ function Dashboard() {
                                             </td>
                                             <td>
                                                 <div className="acciones-botones">
-                                                    <button onClick={() => abrirModalEditarServicio(servicio)} title="Editar servicio">✏️</button>
                                                     {servicio.activo ? (
                                                         <button onClick={() => eliminarServicio(servicio.id)} title="Desactivar servicio">🗑️</button>
                                                     ) : (
@@ -1456,22 +1428,6 @@ function Dashboard() {
                     </div>
                 )
             }
-
-            {/* Modal de Edición de Servicio */}
-            {showModalServicio && (
-                <div className="modal-overlay" onClick={() => setShowModalServicio(false)}>
-                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                        <h3>✏️ Editar Servicio</h3>
-                        <form onSubmit={actualizarServicio}>
-                            <input type="text" placeholder="Nombre del servicio" value={formServicio.nombre} onChange={e => setFormServicio({ ...formServicio, nombre: e.target.value })} required />
-                            <textarea placeholder="Descripción" value={formServicio.descripcion} onChange={e => setFormServicio({ ...formServicio, descripcion: e.target.value })} rows="2" />
-                            <input type="number" step="0.01" placeholder="Precio" value={formServicio.precio} onChange={e => setFormServicio({ ...formServicio, precio: e.target.value })} required />
-                            <button type="submit">Guardar Cambios</button>
-                            <button type="button" onClick={() => setShowModalServicio(false)} style={{ background: '#6c757d', marginTop: '10px' }}>Cancelar</button>
-                        </form>
-                    </div>
-                </div>
-            )}
         </div >
     );
 }
