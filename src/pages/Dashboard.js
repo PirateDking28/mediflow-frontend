@@ -201,16 +201,6 @@ function Dashboard() {
         }
     };
 
-    const abrirModalEditarServicio = (servicio) => {
-        setServicioEditando(servicio);
-        setFormServicio({
-            nombre: servicio.nombre,
-            descripcion: servicio.descripcion || '',
-            precio: servicio.precio
-        });
-        setShowModalServicio(true);
-    };
-
     const actualizarServicio = async (e) => {
         e.preventDefault();
         try {
