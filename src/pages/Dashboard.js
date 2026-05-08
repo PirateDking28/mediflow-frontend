@@ -92,7 +92,6 @@ function Dashboard() {
     const [showModalMedico, setShowModalMedico] = useState(false);
     const [pacienteEditando, setPacienteEditando] = useState(null);
     const [showModalPaciente, setShowModalPaciente] = useState(false);
-    const [showModalServicio, setShowModalServicio] = useState(false);
 
     // Paginación
     const [paginaMedicos, setPaginaMedicos] = useState(1);
@@ -665,7 +664,6 @@ function Dashboard() {
         try {
             await api.put(`/servicios/${servicioEditando.id}`, formServicio);
             alert('Servicio actualizado exitosamente');
-            setShowModalServicio(false);
             setServicioEditando(null);
             setFormServicio({ nombre: '', descripcion: '', precio: '' });
             cargarServiciosCatalogo();
