@@ -103,8 +103,6 @@ function Dashboard() {
     const itemsPorPagina = 10;
 
     const navigate = useNavigate();
-
-    const [servicioEditando, setServicioEditando] = useState(null);
     const [showModalServicio, setShowModalServicio] = useState(false);
 
     // ========== CONSTANTES DE ROL ==========
