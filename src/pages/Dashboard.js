@@ -220,7 +220,7 @@ function Dashboard() {
             setShowModalServicio(false);
             setServicioEditando(null);
             setFormServicio({ nombre: '', descripcion: '', precio: '' });
-            cargarServicios();
+            cargarServiciosCatalogo();  // ← Cambiado
             cargarServiciosDisponibles();
         } catch (error) {
             console.error(error);
@@ -233,7 +233,7 @@ function Dashboard() {
         try {
             await api.put(`/servicios/${id}/activar`);
             alert('Servicio activado');
-            cargarServicios();
+            cargarServiciosCatalogo();  // ← Cambiado
             cargarServiciosDisponibles();
         } catch (error) {
             console.error(error);
@@ -689,15 +689,15 @@ function Dashboard() {
     };
 
     const eliminarServicio = async (id) => {
-        if (!window.confirm('¿Eliminar este servicio?')) return;
+        if (!window.confirm('¿Desactivar este servicio?')) return;
         try {
             await api.delete(`/servicios/${id}`);
-            alert('Servicio eliminado');
-            cargarServiciosCatalogo();
+            alert('Servicio desactivado');
+            cargarServiciosCatalogo();  // ← Cambiado
             cargarServiciosDisponibles();
         } catch (error) {
             console.error(error);
-            alert(error.response?.data?.error || 'Error al eliminar servicio');
+            alert(error.response?.data?.error || 'Error al desactivar servicio');
         }
     };
 
