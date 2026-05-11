@@ -737,9 +737,9 @@ function Dashboard() {
                             ))}
                         </select>
 
-                        <input type="date" value={formCita.fecha} onChange={handleFechaChange} required min={new Date().toISOString().split('T')[0]} />
+                        <input type="date" value={formCita.fecha} onChange={handleFechaChange} required/>
 
-                        <select value={formCita.hora} onChange={e => setFormCita({ ...formCita, hora: e.target.value })} required disabled={cargandoHorarios}>
+                        <select value={formCita.hora} onChange={e => setFormCita({ ...formCita, hora: e.target.value })} required>
                             <option value="">Seleccionar hora</option>
                             {cargandoHorarios ? (
                                 <option disabled>Cargando horarios...</option>
