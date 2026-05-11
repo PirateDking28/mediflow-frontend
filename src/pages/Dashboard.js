@@ -994,16 +994,16 @@ function Dashboard() {
                                             <td>${parseFloat(servicio.precio).toFixed(2)}</td>
                                             <td className={servicio.activo ? 'estado confirmada' : 'estado cancelada'}>
                                                 {servicio.activo ? 'Activo' : 'Inactivo'}
-                                                </td>
-                                                <td>
-                                                    <div className="acciones-botones">
-                                                        {servicio.activo ? (
-                                                            <button onClick={() => eliminarServicio(servicio.id)} title="Desactivar servicio">🗑️</button>
-                                                        ) : (
-                                                            <button onClick={() => activarServicio(servicio.id)} title="Reactivar servicio">🔄</button>
-                                                        )}
-                                                    </div>
-                                                </td>
+                                            </td>
+                                            <td>
+                                                <div className="acciones-botones">
+                                                    {servicio.activo ? (
+                                                        <button onClick={() => eliminarServicio(servicio.id)} title="Desactivar servicio">🗑️</button>
+                                                    ) : (
+                                                        <button onClick={() => activarServicio(servicio.id)} title="Reactivar servicio">🔄</button>
+                                                    )}
+                                                </div>
+                                            </td>
                                         </tr>
                                     ))
                                 )}
