@@ -435,31 +435,29 @@ function Dashboard() {
     const handleCrearCita = async (e) => {
         e.preventDefault();
         try {
+            // Combinar fecha y hora en el formato correcto
+            const fechaHoraStr = `${formCita.fecha}T${formCita.hora}:00`;
+
+            console.log('📝 Enviando al backend:', {
+                paciente_id: formCita.paciente_id,
+                medico_id: formCita.medico_id,
+                fecha_hora: fechaHoraStr,
+                duracion: formCita.duracion,
+                notas: formCita.notas
+            });
+
             const payload = {
                 paciente_id: formCita.paciente_id,
                 medico_id: formCita.medico_id,
-                fecha: formCita.fecha,
-                hora: formCita.hora,
+                fecha_hora: fechaHoraStr,
                 duracion: formCita.duracion,
                 notas: formCita.notas
-                // Eliminar: es_cortesia, servicios
             };
 
-            await api.post('/citas', payload);
-            alert('Cita creada exitosamente');
-            setFormCita({
-                paciente_id: '',
-                medico_id: '',
-                fecha: '',
-                hora: '',
-                duracion: 30,
-                notas: ''
-            });
-            setMostrarFormulario({ ...mostrarFormulario, cita: false });
-            setHorariosDisponibles([]);
-            cargarCitas();
+            const res = await api.post('/citas', payload);
+            // ... resto del código
         } catch (error) {
-            console.error(error);
+            console.error('❌ Error:', error.response?.data || error);
             alert(error.response?.data?.error || 'Error al crear cita');
         }
     };
