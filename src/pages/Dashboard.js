@@ -435,16 +435,7 @@ function Dashboard() {
     const handleCrearCita = async (e) => {
         e.preventDefault();
         try {
-            // Combinar fecha y hora en el formato correcto
             const fechaHoraStr = `${formCita.fecha}T${formCita.hora}:00`;
-
-            console.log('📝 Enviando al backend:', {
-                paciente_id: formCita.paciente_id,
-                medico_id: formCita.medico_id,
-                fecha_hora: fechaHoraStr,
-                duracion: formCita.duracion,
-                notas: formCita.notas
-            });
 
             const payload = {
                 paciente_id: formCita.paciente_id,
@@ -454,8 +445,26 @@ function Dashboard() {
                 notas: formCita.notas
             };
 
-            const res = await api.post('/citas', payload);
-            cargarCitas();
+            await api.post('/citas', payload);
+
+            // Pequeño retraso para asegurar que la BD se actualizó
+            setTimeout(() => {
+                cargarCitas();
+            }, 500);
+
+            // Limpiar formulario y cerrar
+            setFormCita({
+                paciente_id: '',
+                medico_id: '',
+                fecha: '',
+                hora: '',
+                duracion: 30,
+                notas: ''
+            });
+            setMostrarFormulario({ ...mostrarFormulario, cita: false });
+            setHorariosDisponibles([]);
+
+            alert('Cita creada exitosamente');
         } catch (error) {
             console.error('❌ Error:', error.response?.data || error);
             alert(error.response?.data?.error || 'Error al crear cita');
