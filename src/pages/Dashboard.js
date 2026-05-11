@@ -455,7 +455,7 @@ function Dashboard() {
             };
 
             const res = await api.post('/citas', payload);
-            // ... resto del código
+            cargarCitas();
         } catch (error) {
             console.error('❌ Error:', error.response?.data || error);
             alert(error.response?.data?.error || 'Error al crear cita');
@@ -737,7 +737,7 @@ function Dashboard() {
                             ))}
                         </select>
 
-                        <input type="date" value={formCita.fecha} onChange={handleFechaChange} required/>
+                        <input type="date" value={formCita.fecha} onChange={handleFechaChange} required />
 
                         <select value={formCita.hora} onChange={e => setFormCita({ ...formCita, hora: e.target.value })} required>
                             <option value="">Seleccionar hora</option>
