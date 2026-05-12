@@ -71,13 +71,7 @@ function Dashboard() {
     // Estados para deudas
     const [deudasActivas, setDeudasActivas] = useState([]);
     const [historialDeudas, setHistorialDeudas] = useState([]);
-    const [deudaSeleccionada, setDeudaSeleccionada] = useState(null);
-    const [showModalAbono, setShowModalAbono] = useState(false);
     const [showModalEditarDeuda, setShowModalEditarDeuda] = useState(false);
-    const [formAbono, setFormAbono] = useState({
-        monto: '',
-        metodo_pago: 'efectivo'
-    });
     const [formEditarDeuda, setFormEditarDeuda] = useState({
         servicios: [],
         descuento: 0,
