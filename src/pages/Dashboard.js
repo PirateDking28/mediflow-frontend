@@ -218,21 +218,28 @@ function Dashboard() {
     };
 
     const agregarServicioATemporal = () => {
-        if (!servicioSeleccionadoDeuda) {
-            alert('Seleccione un servicio');
+        console.log('servicioSeleccionadoDeuda:', servicioSeleccionadoDeuda);
+
+        if (!servicioSeleccionadoDeuda || servicioSeleccionadoDeuda === '') {
+            alert('Seleccione un servicio de la lista');
             return;
         }
+
         const servicio = serviciosDisponibles.find(s => s.id === parseInt(servicioSeleccionadoDeuda));
+        console.log('Servicio encontrado:', servicio);
+
         if (servicio) {
             setNuevosServicios([...nuevosServicios, {
                 servicio_id: servicio.id,
                 servicio_nombre: servicio.nombre,
-                cantidad: cantidadSeleccionadaDeuda,
+                cantidad: 1,
                 precio_unitario: servicio.precio,
-                subtotal: cantidadSeleccionadaDeuda * servicio.precio
+                subtotal: servicio.precio
             }]);
             setServicioSeleccionadoDeuda('');
-            setCantidadSeleccionadaDeuda(1);
+            alert(`Servicio "${servicio.nombre}" agregado`);
+        } else {
+            alert('Servicio no encontrado');
         }
     };
 
@@ -243,19 +250,24 @@ function Dashboard() {
     };
 
     const guardarEdicionDeuda = async () => {
+        console.log('nuevosServicios:', nuevosServicios);
+
         if (nuevosServicios.length === 0) {
-            alert('No hay servicios nuevos para agregar');
+            alert('No hay servicios nuevos para agregar. Agregue al menos un servicio.');
             return;
         }
 
         try {
-            await api.put(`/cobranza/${deudaSeleccionada.id}/editar`, {
+            const payload = {
                 nuevos_servicios: nuevosServicios.map(s => ({
                     servicio_id: s.servicio_id,
                     cantidad: s.cantidad,
                     precio_unitario: s.precio_unitario
                 }))
-            });
+            };
+            console.log('Payload enviado:', payload);
+
+            await api.put(`/cobranza/${deudaSeleccionada.id}/editar`, payload);
             alert('Servicios agregados exitosamente');
             setShowModalEditarDeuda(false);
             setNuevosServicios([]);
@@ -1264,10 +1276,13 @@ function Dashboard() {
                         <hr />
 
                         <h4>Agregar nuevo servicio</h4>
-                        <div style={{ display: 'flex', gap: '10px', marginBottom: '15px', flexWrap: 'wrap' }}>
+                        <div style={{ display: 'flex', gap: '10px', marginBottom: '15px', flexWrap: 'wrap', alignItems: 'center' }}>
                             <select
-                                value={servicioSeleccionado}
-                                onChange={e => setServicioSeleccionado(e.target.value)}
+                                value={servicioSeleccionadoDeuda}
+                                onChange={e => {
+                                    console.log('Servicio seleccionado:', e.target.value);
+                                    setServicioSeleccionadoDeuda(e.target.value);
+                                }}
                                 style={{ flex: 2, padding: '8px' }}
                             >
                                 <option value="">Seleccionar servicio...</option>
@@ -1275,14 +1290,7 @@ function Dashboard() {
                                     <option key={s.id} value={s.id}>{s.nombre} - ${parseFloat(s.precio).toFixed(2)}</option>
                                 ))}
                             </select>
-                            <input
-                                type="number"
-                                min="1"
-                                value={cantidadSeleccionadaDeuda}
-                                onChange={e => setCantidadSeleccionadaDeuda(parseInt(e.target.value) || 1)}
-                                style={{ width: '80px', padding: '8px' }}
-                            />
-                            <button type="button" onClick={agregarServicioATemporal} style={{ background: '#28a745' }}>Agregar</button>
+                            <button type="button" onClick={agregarServicioATemporal} style={{ background: '#28a745' }}>Agregar Servicio</button>
                         </div>
 
                         {nuevosServicios.length > 0 && (
