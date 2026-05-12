@@ -218,23 +218,21 @@ function Dashboard() {
     };
 
     const agregarServicioATemporal = () => {
-        console.log('servicioSeleccionadoDeuda:', servicioSeleccionadoDeuda);
-
         if (!servicioSeleccionadoDeuda || servicioSeleccionadoDeuda === '') {
             alert('Seleccione un servicio de la lista');
             return;
         }
 
         const servicio = serviciosDisponibles.find(s => s.id === parseInt(servicioSeleccionadoDeuda));
-        console.log('Servicio encontrado:', servicio);
 
         if (servicio) {
+            const precioNumero = parseFloat(servicio.precio);
             setNuevosServicios([...nuevosServicios, {
                 servicio_id: servicio.id,
                 servicio_nombre: servicio.nombre,
                 cantidad: 1,
-                precio_unitario: servicio.precio,
-                subtotal: servicio.precio
+                precio_unitario: precioNumero,
+                subtotal: precioNumero
             }]);
             setServicioSeleccionadoDeuda('');
             alert(`Servicio "${servicio.nombre}" agregado`);
@@ -250,27 +248,23 @@ function Dashboard() {
     };
 
     const guardarEdicionDeuda = async () => {
-        console.log('nuevosServicios:', nuevosServicios);
-
         if (nuevosServicios.length === 0) {
             alert('No hay servicios nuevos para agregar. Agregue al menos un servicio.');
             return;
         }
 
         try {
-            const payload = {
+            await api.put(`/cobranza/${deudaSeleccionada.id}/editar`, {
                 nuevos_servicios: nuevosServicios.map(s => ({
                     servicio_id: s.servicio_id,
                     cantidad: s.cantidad,
                     precio_unitario: s.precio_unitario
                 }))
-            };
-            console.log('Payload enviado:', payload);
-
-            await api.put(`/cobranza/${deudaSeleccionada.id}/editar`, payload);
+            });
             alert('Servicios agregados exitosamente');
             setShowModalEditarDeuda(false);
             setNuevosServicios([]);
+            setServicioSeleccionadoDeuda('');
             cargarDeudasActivas();
             cargarHistorialDeudas();
         } catch (error) {
@@ -849,24 +843,8 @@ function Dashboard() {
 
                         <hr />
 
-                        <h4>Servicios actuales (no se pueden eliminar)</h4>
-                        {deudaSeleccionada?.servicios_actuales?.length > 0 ? (
-                            deudaSeleccionada.servicios_actuales.map((s, idx) => (
-                                <div key={idx} style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px' }}>
-                                    <span style={{ flex: 2 }}>{s.servicio_nombre}</span>
-                                    <span>x{s.cantidad}</span>
-                                    <span>${s.precio_unitario?.toFixed(2)} c/u</span>
-                                    <span><strong>${(s.cantidad * s.precio_unitario).toFixed(2)}</strong></span>
-                                </div>
-                            ))
-                        ) : (
-                            <p>No hay servicios registrados</p>
-                        )}
-
-                        <hr />
-
                         <h4>Agregar nuevo servicio</h4>
-                        <div style={{ display: 'flex', gap: '10px', marginBottom: '15px', flexWrap: 'wrap' }}>
+                        <div style={{ display: 'flex', gap: '10px', marginBottom: '15px', flexWrap: 'wrap', alignItems: 'center' }}>
                             <select
                                 value={servicioSeleccionadoDeuda}
                                 onChange={e => setServicioSeleccionadoDeuda(e.target.value)}
@@ -877,14 +855,7 @@ function Dashboard() {
                                     <option key={s.id} value={s.id}>{s.nombre} - ${parseFloat(s.precio).toFixed(2)}</option>
                                 ))}
                             </select>
-                            <input
-                                type="number"
-                                min="1"
-                                value={cantidadSeleccionadaDeuda}
-                                onChange={e => setCantidadSeleccionadaDeuda(parseInt(e.target.value) || 1)}
-                                style={{ width: '80px', padding: '8px' }}
-                            />
-                            <button type="button" onClick={agregarServicioATemporal} style={{ background: '#28a745' }}>Agregar</button>
+                            <button type="button" onClick={agregarServicioATemporal} style={{ background: '#28a745' }}>Agregar Servicio</button>
                         </div>
 
                         {nuevosServicios.length > 0 && (
@@ -894,7 +865,7 @@ function Dashboard() {
                                     <div key={idx} style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px' }}>
                                         <span style={{ flex: 2 }}>{s.servicio_nombre}</span>
                                         <span>x{s.cantidad}</span>
-                                        <span>${s.precio_unitario.toFixed(2)} c/u</span>
+                                        <span>${parseFloat(s.precio_unitario).toFixed(2)} c/u</span>
                                         <span><strong>${s.subtotal.toFixed(2)}</strong></span>
                                         <button onClick={() => eliminarServicioTemporal(idx)} style={{ background: '#dc3545', padding: '5px 10px' }}>❌</button>
                                     </div>
@@ -905,7 +876,11 @@ function Dashboard() {
 
                         <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
                             <button onClick={guardarEdicionDeuda} style={{ background: '#28a745' }}>Guardar Cambios</button>
-                            <button onClick={() => setShowModalEditarDeuda(false)} style={{ background: '#6c757d' }}>Cancelar</button>
+                            <button onClick={() => {
+                                setShowModalEditarDeuda(false);
+                                setNuevosServicios([]);
+                                setServicioSeleccionadoDeuda('');
+                            }} style={{ background: '#6c757d' }}>Cancelar</button>
                         </div>
                     </div>
                 </div>
