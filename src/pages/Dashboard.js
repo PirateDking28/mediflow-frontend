@@ -785,14 +785,14 @@ function Dashboard() {
                     </thead>
                     <tbody>
                         {citasPaginadas.length === 0 ? (
-                            <td><td colSpan="7">No hay citas programadas</td></td>
+                            <tr><td colSpan="7">No hay citas programadas</td></tr>
                         ) : (
                             citasPaginadas.map(cita => (
                                 <tr key={cita.id}>
                                     <td>{cita.paciente_nombre}</td>
                                     <td>{cita.medico_nombre}</td>
-                                    <td>{cita.fecha_hora ? new Date(cita.fecha_hora).toLocaleDateString('es-MX', { timeZone: 'America/Tijuana' }) : '-'}</td>
-                                    <td>{cita.fecha_hora ? new Date(cita.fecha_hora).toLocaleTimeString('es-MX', { timeZone: 'America/Tijuana', hour: '2-digit', minute: '2-digit' }) : '-'}</td>
+                                    <td>{cita.fecha_hora ? cita.fecha_hora.split('T')[0] : '-'}</td>
+                                    <td>{cita.fecha_hora ? cita.fecha_hora.split('T')[1].substring(0, 5) : '-'}</td>
                                     <td>{cita.duracion} min</td>
                                     <td className={`estado ${cita.estado_cita}`}>{cita.estado_cita}</td>
                                     <td>
