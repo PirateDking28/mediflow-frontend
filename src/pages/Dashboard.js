@@ -1278,8 +1278,8 @@ function Dashboard() {
                             <input
                                 type="number"
                                 min="1"
-                                value={cantidadSeleccionada}
-                                onChange={e => setCantidadSeleccionada(parseInt(e.target.value) || 1)}
+                                value={cantidadSeleccionadaDeuda}
+                                onChange={e => setCantidadSeleccionadaDeuda(parseInt(e.target.value) || 1)}
                                 style={{ width: '80px', padding: '8px' }}
                             />
                             <button type="button" onClick={agregarServicioATemporal} style={{ background: '#28a745' }}>Agregar</button>
