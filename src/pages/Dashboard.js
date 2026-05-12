@@ -86,6 +86,10 @@ function Dashboard() {
     });
     const [busquedaDeuda, setBusquedaDeuda] = useState('');
     const [filtroEstadoDeuda, setFiltroEstadoDeuda] = useState('todos');
+    // Estados para edición de deuda
+    const [nuevosServicios, setNuevosServicios] = useState([]); // Servicios nuevos a agregar
+    const [servicioSeleccionado, setServicioSeleccionado] = useState('');
+    const [cantidadSeleccionada, setCantidadSeleccionada] = useState(1);
 
     // Estados para edición
     const [medicoEditando, setMedicoEditando] = useState(null);
@@ -209,6 +213,56 @@ function Dashboard() {
         } catch (error) {
             console.error(error);
             alert(error.response?.data?.error || 'Error al activar servicio');
+        }
+    };
+
+    const agregarServicioATemporal = () => {
+        if (!servicioSeleccionado) {
+            alert('Seleccione un servicio');
+            return;
+        }
+        const servicio = serviciosDisponibles.find(s => s.id === parseInt(servicioSeleccionado));
+        if (servicio) {
+            setNuevosServicios([...nuevosServicios, {
+                servicio_id: servicio.id,
+                servicio_nombre: servicio.nombre,
+                cantidad: cantidadSeleccionada,
+                precio_unitario: servicio.precio,
+                subtotal: cantidadSeleccionada * servicio.precio
+            }]);
+            setServicioSeleccionado('');
+            setCantidadSeleccionada(1);
+        }
+    };
+
+    const eliminarServicioTemporal = (index) => {
+        const nuevos = [...nuevosServicios];
+        nuevos.splice(index, 1);
+        setNuevosServicios(nuevos);
+    };
+
+    const guardarEdicionDeuda = async () => {
+        if (nuevosServicios.length === 0) {
+            alert('No hay servicios nuevos para agregar');
+            return;
+        }
+
+        try {
+            await api.put(`/cobranza/${deudaSeleccionada.id}/editar`, {
+                nuevos_servicios: nuevosServicios.map(s => ({
+                    servicio_id: s.servicio_id,
+                    cantidad: s.cantidad,
+                    precio_unitario: s.precio_unitario
+                }))
+            });
+            alert('Servicios agregados exitosamente');
+            setShowModalEditarDeuda(false);
+            setNuevosServicios([]);
+            cargarDeudasActivas();
+            cargarHistorialDeudas();
+        } catch (error) {
+            console.error(error);
+            alert(error.response?.data?.error || 'Error al editar deuda');
         }
     };
 
@@ -1216,139 +1270,59 @@ function Dashboard() {
             {/* Modal de Editar Deuda */}
             {showModalEditarDeuda && (
                 <div className="modal-overlay" onClick={() => setShowModalEditarDeuda(false)}>
-                    <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '800px' }}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '700px' }}>
                         <h3>✏️ Editar Deuda</h3>
                         <p><strong>Paciente:</strong> {deudaSeleccionada?.paciente_nombre}</p>
                         <p><strong>Deuda actual:</strong> ${parseFloat(deudaSeleccionada?.monto || 0).toFixed(2)}</p>
                         <p><strong>Saldo pendiente:</strong> ${parseFloat(deudaSeleccionada?.saldo_pendiente || 0).toFixed(2)}</p>
 
-                        <form onSubmit={guardarEdicionDeuda}>
-                            <div>
-                                <label>Agregar servicio:</label>
-                                <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
-                                    <select
-                                        value={formEditarDeuda.nuevo_servicio_id || ''}
-                                        onChange={(e) => {
-                                            const servicioId = parseInt(e.target.value);
-                                            const servicio = serviciosDisponibles.find(s => s.id === servicioId);
-                                            if (servicio) {
-                                                setFormEditarDeuda(prev => ({
-                                                    ...prev,
-                                                    servicios: [...prev.servicios, {
-                                                        servicio_id: servicio.id,
-                                                        cantidad: 1,
-                                                        precio_unitario: servicio.precio,
-                                                        servicio_nombre: servicio.nombre
-                                                    }],
-                                                    nuevo_servicio_id: ''
-                                                }));
-                                            }
-                                        }}
-                                        style={{ flex: 1 }}
-                                    >
-                                        <option value="">Seleccionar servicio...</option>
-                                        {serviciosDisponibles.filter(s => s.activo).map(s => (
-                                            <option key={s.id} value={s.id}>{s.nombre} - ${parseFloat(s.precio).toFixed(2)}</option>
-                                        ))}
-                                    </select>
-                                </div>
+                        <hr />
 
-                                <h4>Servicios actuales:</h4>
-                                {formEditarDeuda.servicios.map((servicio, idx) => (
-                                    <div key={idx} style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap' }}>
-                                        <span style={{ flex: 2 }}>{servicio.servicio_nombre}</span>
-                                        <span style={{ width: '60px', textAlign: 'center' }}>x{servicio.cantidad}</span>
-                                        <span>${parseFloat(servicio.precio_unitario).toFixed(2)} c/u</span>
-                                        <span><strong>Subtotal: ${(servicio.cantidad * servicio.precio_unitario).toFixed(2)}</strong></span>
-                                        {formEditarDeuda.servicios.length > 1 && (
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    const nuevos = formEditarDeuda.servicios.filter((_, i) => i !== idx);
-                                                    setFormEditarDeuda(prev => ({ ...prev, servicios: nuevos }));
-                                                }}
-                                                style={{ background: '#dc3545', padding: '5px 10px' }}
-                                            >
-                                                ❌
-                                            </button>
-                                        )}
+                        <h4>Agregar nuevo servicio</h4>
+                        <div style={{ display: 'flex', gap: '10px', marginBottom: '15px', flexWrap: 'wrap' }}>
+                            <select
+                                value={servicioSeleccionado}
+                                onChange={e => setServicioSeleccionado(e.target.value)}
+                                style={{ flex: 2, padding: '8px' }}
+                            >
+                                <option value="">Seleccionar servicio...</option>
+                                {serviciosDisponibles.map(s => (
+                                    <option key={s.id} value={s.id}>{s.nombre} - ${parseFloat(s.precio).toFixed(2)}</option>
+                                ))}
+                            </select>
+                            <input
+                                type="number"
+                                min="1"
+                                value={cantidadSeleccionada}
+                                onChange={e => setCantidadSeleccionada(parseInt(e.target.value) || 1)}
+                                style={{ width: '80px', padding: '8px' }}
+                            />
+                            <button type="button" onClick={agregarServicioATemporal} style={{ background: '#28a745' }}>Agregar</button>
+                        </div>
+
+                        {nuevosServicios.length > 0 && (
+                            <>
+                                <h4>Servicios a agregar:</h4>
+                                {nuevosServicios.map((s, idx) => (
+                                    <div key={idx} style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px' }}>
+                                        <span style={{ flex: 2 }}>{s.servicio_nombre}</span>
+                                        <span>x{s.cantidad}</span>
+                                        <span>${s.precio_unitario.toFixed(2)} c/u</span>
+                                        <span><strong>${s.subtotal.toFixed(2)}</strong></span>
+                                        <button onClick={() => eliminarServicioTemporal(idx)} style={{ background: '#dc3545', padding: '5px 10px' }}>❌</button>
                                     </div>
                                 ))}
+                                <p><strong>Total a agregar: ${nuevosServicios.reduce((sum, s) => sum + s.subtotal, 0).toFixed(2)}</strong></p>
+                            </>
+                        )}
 
-                                <div style={{ marginTop: '15px', padding: '10px', background: '#f8f9fa', borderRadius: '5px' }}>
-                                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px' }}>
-                                        <label>
-                                            <input
-                                                type="checkbox"
-                                                checked={formEditarDeuda.precio_personalizado}
-                                                onChange={(e) => setFormEditarDeuda(prev => ({
-                                                    ...prev,
-                                                    precio_personalizado: e.target.checked,
-                                                    monto_personalizado: e.target.checked ? prev.monto_personalizado : 0
-                                                }))}
-                                            />
-                                            Precio personalizado (descuento especial)
-                                        </label>
-                                    </div>
-
-                                    {formEditarDeuda.precio_personalizado && (
-                                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px' }}>
-                                            <label>Monto personalizado:</label>
-                                            <input
-                                                type="number"
-                                                step="0.01"
-                                                min="0"
-                                                value={formEditarDeuda.monto_personalizado}
-                                                onChange={(e) => setFormEditarDeuda(prev => ({ ...prev, monto_personalizado: parseFloat(e.target.value) || 0 }))}
-                                                style={{ width: '150px' }}
-                                                placeholder="Monto total"
-                                            />
-                                            <small style={{ color: '#666' }}>Si se modifica, se usará este monto en lugar de la suma de servicios</small>
-                                        </div>
-                                    )}
-
-                                    {!formEditarDeuda.precio_personalizado && (
-                                        <>
-                                            <p><strong>Subtotal servicios: ${formEditarDeuda.servicios.reduce((sum, s) => sum + (s.cantidad * s.precio_unitario), 0).toFixed(2)}</strong></p>
-                                            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                                                <label>Descuento (opcional):</label>
-                                                <input
-                                                    type="number"
-                                                    step="0.01"
-                                                    min="0"
-                                                    value={formEditarDeuda.descuento}
-                                                    onChange={(e) => setFormEditarDeuda(prev => ({ ...prev, descuento: e.target.value }))}
-                                                    style={{ width: '120px' }}
-                                                />
-                                                <span> - </span>
-                                                <strong style={{ color: '#28a745' }}>Total a cobrar: ${Math.max(0, formEditarDeuda.servicios.reduce((sum, s) => sum + (s.cantidad * s.precio_unitario), 0) - (parseFloat(formEditarDeuda.descuento) || 0)).toFixed(2)}</strong>
-                                            </div>
-                                        </>
-                                    )}
-
-                                    {formEditarDeuda.precio_personalizado && (
-                                        <p><strong>Total a cobrar: ${formEditarDeuda.monto_personalizado.toFixed(2)}</strong></p>
-                                    )}
-                                </div>
-                            </div>
-
-                            <textarea
-                                placeholder="Notas adicionales"
-                                value={formEditarDeuda.notas}
-                                onChange={e => setFormEditarDeuda(prev => ({ ...prev, notas: e.target.value }))}
-                                rows="2"
-                                style={{ width: '100%', marginTop: '15px' }}
-                            />
-
-                            <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-                                <button type="submit" style={{ background: '#28a745' }}>Guardar Cambios</button>
-                                <button type="button" onClick={() => setShowModalEditarDeuda(false)} style={{ background: '#6c757d' }}>Cancelar</button>
-                            </div>
-                        </form>
+                        <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+                            <button onClick={guardarEdicionDeuda} style={{ background: '#28a745' }}>Guardar Cambios</button>
+                            <button onClick={() => setShowModalEditarDeuda(false)} style={{ background: '#6c757d' }}>Cancelar</button>
+                        </div>
                     </div>
-                </div >
-            )
-            }
+                </div>
+            )}
 
             {/* Modal de Edición de Médico */}
             {
