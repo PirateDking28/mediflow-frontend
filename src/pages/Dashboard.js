@@ -687,7 +687,7 @@ function Dashboard() {
 
     const formatearFecha = (fecha) => {
         if (!fecha) return '';
-        return new Date(fecha).toLocaleString();
+        return new Date(fecha).toLocaleString('es-MX', { timeZone: 'America/Tijuana' });
     };
 
     if (cargando) return <div className="container"><h2>Cargando...</h2></div>;
@@ -791,8 +791,8 @@ function Dashboard() {
                                 <tr key={cita.id}>
                                     <td>{cita.paciente_nombre}</td>
                                     <td>{cita.medico_nombre}</td>
-                                    <td>{cita.fecha || new Date(cita.fecha_hora).toLocaleDateString()}</td>
-                                    <td>{cita.hora || new Date(cita.fecha_hora).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
+                                    <td>{cita.fecha_hora ? new Date(cita.fecha_hora).toLocaleDateString('es-MX', { timeZone: 'America/Tijuana' }) : '-'}</td>
+                                    <td>{cita.fecha_hora ? new Date(cita.fecha_hora).toLocaleTimeString('es-MX', { timeZone: 'America/Tijuana', hour: '2-digit', minute: '2-digit' }) : '-'}</td>
                                     <td>{cita.duracion} min</td>
                                     <td className={`estado ${cita.estado_cita}`}>{cita.estado_cita}</td>
                                     <td>
@@ -813,7 +813,7 @@ function Dashboard() {
                 </table>
                 {totalPaginasCitas > 1 && <div className="paginacion">...</div>}
             </div>
-            
+
             {/* Modal de Servicios de Cita */}
             {mostrarModalServicios && (
                 <div className="modal-overlay" onClick={cerrarModalServicios}>
