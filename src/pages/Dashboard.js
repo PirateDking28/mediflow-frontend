@@ -661,49 +661,6 @@ function Dashboard() {
             alert('Error al cargar los datos de la deuda');
         }
     };
-    const guardarEdicionDeuda = async (e) => {
-        e.preventDefault();
-        try {
-            let payload;
-
-            if (formEditarDeuda.precio_personalizado) {
-                // Usar monto personalizado
-                payload = {
-                    servicios_ids: formEditarDeuda.servicios.map(s => ({
-                        servicio_id: s.servicio_id,
-                        cantidad: s.cantidad,
-                        precio_unitario: s.precio_unitario
-                    })),
-                    monto_personalizado: formEditarDeuda.monto_personalizado,
-                    notas: formEditarDeuda.notas
-                };
-            } else {
-                // Usar suma de servicios + descuento
-                const subtotal = formEditarDeuda.servicios.reduce((sum, s) => sum + (s.cantidad * s.precio_unitario), 0);
-                const total = Math.max(0, subtotal - (parseFloat(formEditarDeuda.descuento) || 0));
-                payload = {
-                    servicios_ids: formEditarDeuda.servicios.map(s => ({
-                        servicio_id: s.servicio_id,
-                        cantidad: s.cantidad,
-                        precio_unitario: s.precio_unitario
-                    })),
-                    descuento: parseFloat(formEditarDeuda.descuento) || 0,
-                    monto_personalizado: total,
-                    notas: formEditarDeuda.notas
-                };
-            }
-
-            await api.put(`/cobranza/${deudaSeleccionada.id}/editar`, payload);
-            alert('Deuda actualizada exitosamente');
-            setShowModalEditarDeuda(false);
-            setDeudaSeleccionada(null);
-            cargarDeudasActivas();
-            cargarHistorialDeudas();
-        } catch (error) {
-            console.error(error);
-            alert(error.response?.data?.error || 'Error al actualizar deuda');
-        }
-    };
 
     // ========== SERVICIOS ==========
     const handleCrearServicio = async (e) => {
@@ -869,48 +826,75 @@ function Dashboard() {
                 {totalPaginasCitas > 1 && <div className="paginacion">...</div>}
             </div>
 
-            {/* Modal de Servicios de Cita */}
-            {mostrarModalServicios && (
-                <div className="modal-overlay" onClick={cerrarModalServicios}>
-                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                        <h3>📦 Servicios de la Cita</h3>
+            {/* Modal de Editar Deuda */}
+            {showModalEditarDeuda && (
+                <div className="modal-overlay" onClick={() => setShowModalEditarDeuda(false)}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '700px' }}>
+                        <h3>✏️ Editar Deuda</h3>
+                        <p><strong>Paciente:</strong> {deudaSeleccionada?.paciente_nombre}</p>
+                        <p><strong>Deuda actual:</strong> ${parseFloat(deudaSeleccionada?.monto || 0).toFixed(2)}</p>
+                        <p><strong>Saldo pendiente:</strong> ${parseFloat(deudaSeleccionada?.saldo_pendiente || 0).toFixed(2)}</p>
 
-                        <div className="form-card" style={{ margin: '10px 0' }}>
-                            <h4>Agregar servicio</h4>
-                            <form onSubmit={agregarServicioACita}>
-                                <select value={servicioSeleccionado} onChange={e => setServicioSeleccionado(e.target.value)} required>
-                                    <option value="">Seleccionar servicio</option>
-                                    {serviciosDisponibles.map(s => (
-                                        <option key={s.id} value={s.id}>{s.nombre} - ${parseFloat(s.precio).toFixed(2)}</option>
-                                    ))}
-                                </select>
-                                <input type="number" min="1" value={cantidadServicio} onChange={e => setCantidadServicio(e.target.value)} placeholder="Cantidad" style={{ width: '100%', marginTop: '10px' }} />
-                                <button type="submit">Agregar</button>
-                            </form>
+                        <hr />
+
+                        <h4>Servicios actuales (no se pueden eliminar)</h4>
+                        {deudaSeleccionada?.servicios_actuales?.length > 0 ? (
+                            deudaSeleccionada.servicios_actuales.map((s, idx) => (
+                                <div key={idx} style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px' }}>
+                                    <span style={{ flex: 2 }}>{s.servicio_nombre}</span>
+                                    <span>x{s.cantidad}</span>
+                                    <span>${s.precio_unitario?.toFixed(2)} c/u</span>
+                                    <span><strong>${(s.cantidad * s.precio_unitario).toFixed(2)}</strong></span>
+                                </div>
+                            ))
+                        ) : (
+                            <p>No hay servicios registrados</p>
+                        )}
+
+                        <hr />
+
+                        <h4>Agregar nuevo servicio</h4>
+                        <div style={{ display: 'flex', gap: '10px', marginBottom: '15px', flexWrap: 'wrap' }}>
+                            <select
+                                value={servicioSeleccionadoDeuda}
+                                onChange={e => setServicioSeleccionadoDeuda(e.target.value)}
+                                style={{ flex: 2, padding: '8px' }}
+                            >
+                                <option value="">Seleccionar servicio...</option>
+                                {serviciosDisponibles.map(s => (
+                                    <option key={s.id} value={s.id}>{s.nombre} - ${parseFloat(s.precio).toFixed(2)}</option>
+                                ))}
+                            </select>
+                            <input
+                                type="number"
+                                min="1"
+                                value={cantidadSeleccionadaDeuda}
+                                onChange={e => setCantidadSeleccionadaDeuda(parseInt(e.target.value) || 1)}
+                                style={{ width: '80px', padding: '8px' }}
+                            />
+                            <button type="button" onClick={agregarServicioATemporal} style={{ background: '#28a745' }}>Agregar</button>
                         </div>
 
-                        <h4>Servicios agregados</h4>
-                        <table className="tabla" style={{ minWidth: 'auto' }}>
-                            <thead>
-                                <tr><th>Servicio</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th><th>Acción</th></tr>
-                            </thead>
-                            <tbody>
-                                {serviciosCita.length === 0 ? (
-                                    <td><td colSpan="5">No hay servicios agregados a esta cita</td></td>
-                                ) : (
-                                    serviciosCita.map(s => (
-                                        <tr key={s.id}>
-                                            <td>{s.servicio_nombre}</td>
-                                            <td>{s.cantidad}</td>
-                                            <td>${parseFloat(s.precio_unitario).toFixed(2)}</td>
-                                            <td>${parseFloat(s.subtotal).toFixed(2)}</td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
-                        <p><strong>Total de la cita: ${citas.find(c => c.id === citaSeleccionada)?.total ? parseFloat(citas.find(c => c.id === citaSeleccionada).total).toFixed(2) : '0.00'}</strong></p>
-                        <button onClick={cerrarModalServicios} style={{ marginTop: '15px', background: '#6c757d' }}>Cerrar</button>
+                        {nuevosServicios.length > 0 && (
+                            <>
+                                <h4>Servicios a agregar:</h4>
+                                {nuevosServicios.map((s, idx) => (
+                                    <div key={idx} style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px' }}>
+                                        <span style={{ flex: 2 }}>{s.servicio_nombre}</span>
+                                        <span>x{s.cantidad}</span>
+                                        <span>${s.precio_unitario.toFixed(2)} c/u</span>
+                                        <span><strong>${s.subtotal.toFixed(2)}</strong></span>
+                                        <button onClick={() => eliminarServicioTemporal(idx)} style={{ background: '#dc3545', padding: '5px 10px' }}>❌</button>
+                                    </div>
+                                ))}
+                                <p><strong>Total a agregar: ${nuevosServicios.reduce((sum, s) => sum + s.subtotal, 0).toFixed(2)}</strong></p>
+                            </>
+                        )}
+
+                        <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+                            <button onClick={guardarEdicionDeuda} style={{ background: '#28a745' }}>Guardar Cambios</button>
+                            <button onClick={() => setShowModalEditarDeuda(false)} style={{ background: '#6c757d' }}>Cancelar</button>
+                        </div>
                     </div>
                 </div>
             )}
