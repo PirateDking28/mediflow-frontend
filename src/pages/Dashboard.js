@@ -86,10 +86,11 @@ function Dashboard() {
     });
     const [busquedaDeuda, setBusquedaDeuda] = useState('');
     const [filtroEstadoDeuda, setFiltroEstadoDeuda] = useState('todos');
-    // Estados para edición de deuda
-    const [nuevosServicios, setNuevosServicios] = useState([]); // Servicios nuevos a agregar
-    const [servicioSeleccionado, setServicioSeleccionado] = useState('');
-    const [cantidadSeleccionada, setCantidadSeleccionada] = useState(1);
+
+    // Estados para edición de deuda (renombrados)
+    const [nuevosServicios, setNuevosServicios] = useState([]);
+    const [servicioSeleccionadoDeuda, setServicioSeleccionadoDeuda] = useState('');
+    const [cantidadSeleccionadaDeuda, setCantidadSeleccionadaDeuda] = useState(1);
 
     // Estados para edición
     const [medicoEditando, setMedicoEditando] = useState(null);
@@ -217,21 +218,21 @@ function Dashboard() {
     };
 
     const agregarServicioATemporal = () => {
-        if (!servicioSeleccionado) {
+        if (!servicioSeleccionadoDeuda) {
             alert('Seleccione un servicio');
             return;
         }
-        const servicio = serviciosDisponibles.find(s => s.id === parseInt(servicioSeleccionado));
+        const servicio = serviciosDisponibles.find(s => s.id === parseInt(servicioSeleccionadoDeuda));
         if (servicio) {
             setNuevosServicios([...nuevosServicios, {
                 servicio_id: servicio.id,
                 servicio_nombre: servicio.nombre,
-                cantidad: cantidadSeleccionada,
+                cantidad: cantidadSeleccionadaDeuda,
                 precio_unitario: servicio.precio,
-                subtotal: cantidadSeleccionada * servicio.precio
+                subtotal: cantidadSeleccionadaDeuda * servicio.precio
             }]);
-            setServicioSeleccionado('');
-            setCantidadSeleccionada(1);
+            setServicioSeleccionadoDeuda('');
+            setCantidadSeleccionadaDeuda(1);
         }
     };
 
