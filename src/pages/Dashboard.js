@@ -617,6 +617,7 @@ function Dashboard() {
     };
 
     const abrirModalServicios = async (citaId) => {
+        console.log('Abriendo modal para cita:', citaId); // Log para depurar
         setCitaSeleccionada(citaId);
         setMostrarModalServicios(true);
         await cargarServiciosDisponibles();
@@ -836,7 +837,10 @@ function Dashboard() {
                                     <td className={`estado ${cita.estado_cita}`}>{cita.estado_cita}</td>
                                     <td>
                                         <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
-                                            <button onClick={() => abrirModalServicios(cita.id)} style={{ background: '#17a2b8' }}>📦</button>
+                                            <button onClick={() => {
+                                                console.log('ID de cita:', cita.id);
+                                                abrirModalServicios(cita.id);
+                                            }} style={{ background: '#17a2b8' }}>📦</button>
                                             {cita.estado_cita !== 'completada' && cita.estado_cita !== 'cancelada' && (
                                                 <button onClick={() => completarCita(cita.id)} style={{ background: '#28a745' }}>✅ Completar</button>
                                             )}
