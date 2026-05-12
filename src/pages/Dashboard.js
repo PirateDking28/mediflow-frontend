@@ -776,7 +776,8 @@ function Dashboard() {
                         <tr>
                             <th>Paciente</th>
                             <th>Médico</th>
-                            <th>Fecha y Hora</th>
+                            <th>Fecha</th>
+                            <th>Hora</th>
                             <th>Duración</th>
                             <th>Estado</th>
                             <th>Acciones</th>
@@ -784,28 +785,22 @@ function Dashboard() {
                     </thead>
                     <tbody>
                         {citasPaginadas.length === 0 ? (
-                            <tr><td colSpan="6">No hay citas programadas</td></tr>
+                            <td><td colSpan="7">No hay citas programadas</td></td>
                         ) : (
                             citasPaginadas.map(cita => (
                                 <tr key={cita.id}>
                                     <td>{cita.paciente_nombre}</td>
                                     <td>{cita.medico_nombre}</td>
-                                    <td>{formatearFecha(cita.fecha_hora)}</td>
+                                    <td>{cita.fecha || new Date(cita.fecha_hora).toLocaleDateString()}</td>
+                                    <td>{cita.hora || new Date(cita.fecha_hora).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
                                     <td>{cita.duracion} min</td>
-                                    <td className={`estado ${cita.estado_cita}`}>{cita.estado_cita || 'pendiente'}</td>
+                                    <td className={`estado ${cita.estado_cita}`}>{cita.estado_cita}</td>
                                     <td>
                                         <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
-                                            {/* Botón 📦 solo si NO está completada */}
-                                            {cita.estado_cita !== 'completada' && (
-                                                <button onClick={() => abrirModalServicios(cita.id)} style={{ background: '#17a2b8' }}>📦</button>
-                                            )}
-
-                                            {/* Botón ✅ Completar solo si NO está completada */}
+                                            <button onClick={() => abrirModalServicios(cita.id)} style={{ background: '#17a2b8' }}>📦</button>
                                             {cita.estado_cita !== 'completada' && cita.estado_cita !== 'cancelada' && (
                                                 <button onClick={() => completarCita(cita.id)} style={{ background: '#28a745' }}>✅ Completar</button>
                                             )}
-
-                                            {/* Botón ❌ Cancelar solo si NO está completada */}
                                             {cita.estado_cita !== 'completada' && cita.estado_cita !== 'cancelada' && (
                                                 <button onClick={() => cancelarCita(cita.id)}>❌</button>
                                             )}
@@ -816,9 +811,9 @@ function Dashboard() {
                         )}
                     </tbody>
                 </table>
-                {totalPaginasCitas > 1 && <div className="paginacion"><button onClick={() => setPaginaCitas(1)} disabled={paginaCitas === 1}>«</button><button onClick={() => setPaginaCitas(paginaCitas - 1)} disabled={paginaCitas === 1}>Anterior</button><span>Página {paginaCitas} de {totalPaginasCitas}</span><button onClick={() => setPaginaCitas(paginaCitas + 1)} disabled={paginaCitas === totalPaginasCitas}>Siguiente</button><button onClick={() => setPaginaCitas(totalPaginasCitas)} disabled={paginaCitas === totalPaginasCitas}>»</button></div>}
+                {totalPaginasCitas > 1 && <div className="paginacion">...</div>}
             </div>
-
+            
             {/* Modal de Servicios de Cita */}
             {mostrarModalServicios && (
                 <div className="modal-overlay" onClick={cerrarModalServicios}>
