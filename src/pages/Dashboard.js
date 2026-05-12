@@ -98,6 +98,15 @@ function Dashboard() {
     const [pacienteEditando, setPacienteEditando] = useState(null);
     const [showModalPaciente, setShowModalPaciente] = useState(false);
 
+    // Estados para el modal de abono
+    const [showModalAbono, setShowModalAbono] = useState(false);
+    const [deudaSeleccionada, setDeudaSeleccionada] = useState(null);
+    const [formAbono, setFormAbono] = useState({
+        monto: '',
+        metodo_pago: 'efectivo',
+        es_descuento: false
+    });
+
     // Paginación
     const [paginaMedicos, setPaginaMedicos] = useState(1);
     const [paginaPacientes, setPaginaPacientes] = useState(1);
@@ -271,6 +280,16 @@ function Dashboard() {
             console.error(error);
             alert(error.response?.data?.error || 'Error al editar deuda');
         }
+    };
+
+    const abrirModalAbono = (deuda) => {
+        setDeudaSeleccionada(deuda);
+        setFormAbono({
+            monto: '',
+            metodo_pago: 'efectivo',
+            es_descuento: false
+        });
+        setShowModalAbono(true);
     };
 
     // ========== EFECTOS ==========
@@ -619,26 +638,34 @@ function Dashboard() {
     };
 
     // ========== DEUDAS ==========
-    const registrarAbono = async (e) => {
-        e.preventDefault();
-        if (!formAbono.monto || parseFloat(formAbono.monto) <= 0) {
+    const registrarAbono = async () => {
+        const monto = parseFloat(formAbono.monto);
+
+        if (!monto || monto <= 0) {
             alert('Ingrese un monto válido');
+            return;
+        }
+
+        const saldoPendiente = parseFloat(deudaSeleccionada.saldo_pendiente);
+        if (monto > saldoPendiente) {
+            alert(`El monto no puede ser mayor al saldo pendiente ($${saldoPendiente.toFixed(2)})`);
             return;
         }
 
         try {
             await api.post(`/cobranza/${deudaSeleccionada.id}/abonar`, {
-                monto: parseFloat(formAbono.monto),
-                metodo_pago: formAbono.metodo_pago
+                monto: monto,
+                metodo_pago: formAbono.metodo_pago,
+                es_descuento: formAbono.es_descuento
             });
-            alert('Abono registrado exitosamente');
+
+            alert(formAbono.es_descuento ? 'Descuento aplicado exitosamente' : 'Abono registrado exitosamente');
             setShowModalAbono(false);
-            setFormAbono({ monto: '', metodo_pago: 'efectivo' });
             cargarDeudasActivas();
             cargarHistorialDeudas();
         } catch (error) {
             console.error(error);
-            alert(error.response?.data?.error || 'Error al registrar abono');
+            alert(error.response?.data?.error || 'Error al procesar la transacción');
         }
     };
 
@@ -935,10 +962,7 @@ function Dashboard() {
                                 <td>
                                     <div style={{ display: 'flex', gap: '5px' }}>
                                         <button onClick={() => abrirModalEditarDeuda(deuda)} style={{ background: '#ffc107', color: '#000' }}>✏️</button>
-                                        <button onClick={() => {
-                                            setDeudaSeleccionada(deuda);
-                                            setShowModalAbono(true);
-                                        }} style={{ background: '#28a745' }}>💰</button>
+                                        <button onClick={() => abrirModalAbono(deuda)} style={{ background: '#28a745' }}>💰</button>
                                     </div>
                                 </td>
                             </tr>
@@ -1218,27 +1242,63 @@ function Dashboard() {
                 )}
             </div>
 
-            {/* Modal de Abono */}
+            {/* Modal de Abono/Descuento */}
             {showModalAbono && (
                 <div className="modal-overlay" onClick={() => setShowModalAbono(false)}>
-                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                        <h3>💰 Registrar Abono</h3>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '500px' }}>
+                        <h3>💰 {formAbono.es_descuento ? 'Aplicar Descuento' : 'Registrar Abono'}</h3>
+
                         <p><strong>Paciente:</strong> {deudaSeleccionada?.paciente_nombre}</p>
+                        <p><strong>Deuda actual:</strong> ${parseFloat(deudaSeleccionada?.monto || 0).toFixed(2)}</p>
                         <p><strong>Saldo pendiente:</strong> ${parseFloat(deudaSeleccionada?.saldo_pendiente || 0).toFixed(2)}</p>
-                        <form onSubmit={registrarAbono}>
-                            <input type="number" step="0.01" placeholder="Monto a pagar" value={formAbono.monto} onChange={e => setFormAbono({ ...formAbono, monto: e.target.value })} required />
-                            <select value={formAbono.metodo_pago} onChange={e => setFormAbono({ ...formAbono, metodo_pago: e.target.value })}>
+
+                        <hr />
+
+                        <div style={{ marginBottom: '15px' }}>
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    checked={formAbono.es_descuento}
+                                    onChange={(e) => setFormAbono({ ...formAbono, es_descuento: e.target.checked, metodo_pago: e.target.checked ? 'descuento' : 'efectivo' })}
+                                />
+                                Aplicar como descuento (no como pago)
+                            </label>
+                            <small style={{ display: 'block', color: '#666' }}>
+                                {formAbono.es_descuento ? 'El descuento reduce el monto total de la deuda.' : 'El abono reduce el saldo pendiente.'}
+                            </small>
+                        </div>
+
+                        <input
+                            type="number"
+                            step="0.01"
+                            placeholder="Monto"
+                            value={formAbono.monto}
+                            onChange={e => setFormAbono({ ...formAbono, monto: e.target.value })}
+                            style={{ width: '100%', padding: '10px', marginBottom: '10px', border: '1px solid #ddd', borderRadius: '5px' }}
+                            required
+                        />
+
+                        {!formAbono.es_descuento && (
+                            <select
+                                value={formAbono.metodo_pago}
+                                onChange={e => setFormAbono({ ...formAbono, metodo_pago: e.target.value })}
+                                style={{ width: '100%', padding: '10px', marginBottom: '15px', border: '1px solid #ddd', borderRadius: '5px' }}
+                            >
                                 <option value="efectivo">Efectivo</option>
                                 <option value="tarjeta">Tarjeta</option>
                                 <option value="transferencia">Transferencia</option>
                             </select>
-                            <button type="submit">Registrar Abono</button>
-                            <button type="button" onClick={() => setShowModalAbono(false)} style={{ background: '#6c757d', marginTop: '10px' }}>Cancelar</button>
-                        </form>
+                        )}
+
+                        <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                            <button onClick={registrarAbono} style={{ background: '#28a745' }}>
+                                {formAbono.es_descuento ? 'Aplicar Descuento' : 'Registrar Abono'}
+                            </button>
+                            <button onClick={() => setShowModalAbono(false)} style={{ background: '#6c757d' }}>Cancelar</button>
+                        </div>
                     </div>
                 </div>
             )}
-
             {/* Modal de Editar Deuda */}
             {showModalEditarDeuda && (
                 <div className="modal-overlay" onClick={() => setShowModalEditarDeuda(false)}>
