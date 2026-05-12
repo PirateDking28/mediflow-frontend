@@ -165,10 +165,9 @@ function Dashboard() {
     const cargarServiciosDisponibles = async () => {
         try {
             const res = await api.get('/servicios');
-            const activos = res.data.servicios?.filter(s => s.activo === true) || [];
-            setServiciosDisponibles(activos);
+            setServiciosDisponibles(res.data.servicios || []);
         } catch (error) {
-            console.error('Error al cargar servicios disponibles:', error);
+            console.error(error);
         }
     };
 
@@ -577,12 +576,11 @@ function Dashboard() {
             const res = await api.get(`/citas/${citaId}/servicios`);
             setServiciosCita(res.data.servicios || []);
         } catch (error) {
-            console.error('Error al cargar servicios de la cita:', error);
+            console.error(error);
         }
     };
 
-    const agregarServicioACita = async (e) => {
-        e.preventDefault();
+    const agregarServicioACita = async () => {
         if (!servicioSeleccionado) {
             alert('Seleccione un servicio');
             return;
@@ -592,46 +590,43 @@ function Dashboard() {
                 servicio_id: parseInt(servicioSeleccionado),
                 cantidad: cantidadServicio
             });
-            alert('Servicio agregado a la cita');
+            alert('Servicio agregado');
             setServicioSeleccionado('');
             setCantidadServicio(1);
             cargarServiciosDeCita(citaSeleccionada);
-            cargarCitas();
         } catch (error) {
             console.error(error);
-            alert(error.response?.data?.error || 'Error al agregar servicio');
+            alert('Error al agregar servicio');
         }
     };
 
     const eliminarServicioDeCita = async (servicioCitaId) => {
-        if (!window.confirm('¿Eliminar este servicio de la cita?')) return;
+        if (!window.confirm('¿Eliminar este servicio?')) return;
         try {
             await api.delete(`/citas/${citaSeleccionada}/servicios/${servicioCitaId}`);
             alert('Servicio eliminado');
             cargarServiciosDeCita(citaSeleccionada);
-            cargarCitas();
         } catch (error) {
             console.error(error);
-            alert(error.response?.data?.error || 'Error al eliminar servicio');
+            alert('Error al eliminar servicio');
         }
     };
 
     const abrirModalServicios = async (citaId) => {
-        console.log('Abriendo modal para cita:', citaId); // Log para depurar
+        console.log('Abriendo modal para cita:', citaId);
         setCitaSeleccionada(citaId);
+        console.log('setMostrarModalServicios a true');
         setMostrarModalServicios(true);
         await cargarServiciosDisponibles();
         await cargarServiciosDeCita(citaId);
+        console.log('mostrarModalServicios debería ser true');
     };
 
     const cerrarModalServicios = () => {
         setMostrarModalServicios(false);
         setCitaSeleccionada(null);
         setServiciosCita([]);
-        setServicioSeleccionado('');
-        setCantidadServicio(1);
     };
-
     // ========== DEUDAS ==========
     const registrarAbono = async () => {
         const monto = parseFloat(formAbono.monto);
@@ -1404,6 +1399,56 @@ function Dashboard() {
                     </div>
                 )
             }
+            {/* Modal de Servicios de Cita */}
+            {mostrarModalServicios && (
+                <div className="modal-overlay" onClick={cerrarModalServicios}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px' }}>
+                        <h3>📦 Servicios de la Cita</h3>
+
+                        <div style={{ marginBottom: '15px' }}>
+                            <h4>Agregar servicio</h4>
+                            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                                <select
+                                    value={servicioSeleccionado}
+                                    onChange={e => setServicioSeleccionado(e.target.value)}
+                                    style={{ flex: 2, padding: '8px' }}
+                                >
+                                    <option value="">Seleccionar servicio...</option>
+                                    {serviciosDisponibles.map(s => (
+                                        <option key={s.id} value={s.id}>{s.nombre} - ${parseFloat(s.precio).toFixed(2)}</option>
+                                    ))}
+                                </select>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    value={cantidadServicio}
+                                    onChange={e => setCantidadServicio(parseInt(e.target.value) || 1)}
+                                    style={{ width: '80px', padding: '8px' }}
+                                />
+                                <button onClick={agregarServicioACita} style={{ background: '#28a745' }}>Agregar</button>
+                            </div>
+                        </div>
+
+                        <h4>Servicios agregados</h4>
+                        {serviciosCita.length === 0 ? (
+                            <p>No hay servicios agregados a esta cita</p>
+                        ) : (
+                            serviciosCita.map(s => (
+                                <div key={s.id} style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px' }}>
+                                    <span style={{ flex: 2 }}>{s.servicio_nombre}</span>
+                                    <span>x{s.cantidad}</span>
+                                    <span>${parseFloat(s.precio_unitario).toFixed(2)} c/u</span>
+                                    <span><strong>${parseFloat(s.subtotal).toFixed(2)}</strong></span>
+                                    <button onClick={() => eliminarServicioDeCita(s.id)} style={{ background: '#dc3545', padding: '5px 10px' }}>🗑️</button>
+                                </div>
+                            ))
+                        )}
+
+                        <button onClick={cerrarModalServicios} style={{ background: '#6c757d', marginTop: '15px' }}>Cerrar</button>
+                    </div>
+                </div>
+            )}
+
         </div >
     );
 }
