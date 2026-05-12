@@ -588,11 +588,10 @@ function Dashboard() {
         try {
             await api.post(`/citas/${citaSeleccionada}/servicios`, {
                 servicio_id: parseInt(servicioSeleccionado),
-                cantidad: cantidadServicio
+                cantidad: 1  // Siempre 1
             });
             alert('Servicio agregado');
             setServicioSeleccionado('');
-            setCantidadServicio(1);
             cargarServiciosDeCita(citaSeleccionada);
         } catch (error) {
             console.error(error);
@@ -1418,25 +1417,18 @@ function Dashboard() {
                                         <option key={s.id} value={s.id}>{s.nombre} - ${parseFloat(s.precio).toFixed(2)}</option>
                                     ))}
                                 </select>
-                                <input
-                                    type="number"
-                                    min="1"
-                                    value={cantidadServicio}
-                                    onChange={e => setCantidadServicio(parseInt(e.target.value) || 1)}
-                                    style={{ width: '80px', padding: '8px' }}
-                                />
                                 <button onClick={agregarServicioACita} style={{ background: '#28a745' }}>Agregar</button>
                             </div>
                         </div>
 
-                        <h4>Servicios agregados</h4>
+                        <h4>Servicios agregados a esta cita</h4>
                         {serviciosCita.length === 0 ? (
-                            <p>No hay servicios agregados a esta cita</p>
+                            <p>No hay servicios agregados</p>
                         ) : (
                             serviciosCita.map(s => (
                                 <div key={s.id} style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px' }}>
                                     <span style={{ flex: 2 }}>{s.servicio_nombre}</span>
-                                    <span>x{s.cantidad}</span>
+                                    <span>x1</span>
                                     <span>${parseFloat(s.precio_unitario).toFixed(2)} c/u</span>
                                     <span><strong>${parseFloat(s.subtotal).toFixed(2)}</strong></span>
                                     <button onClick={() => eliminarServicioDeCita(s.id)} style={{ background: '#dc3545', padding: '5px 10px' }}>🗑️</button>
@@ -1444,7 +1436,9 @@ function Dashboard() {
                             ))
                         )}
 
-                        <button onClick={cerrarModalServicios} style={{ background: '#6c757d', marginTop: '15px' }}>Cerrar</button>
+                        <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+                            <button onClick={cerrarModalServicios} style={{ background: '#28a745' }}>Guardar Cambios</button>
+                        </div>
                     </div>
                 </div>
             )}
