@@ -19,11 +19,16 @@ function Login() {
             console.log('Respuesta del login:', res.data);  // ← Agregar log
             console.log('Token recibido:', res.data.token); // ← Agregar log
 
-            if (res.data.exito !== false) {
+            if (res.data.exito) {
                 localStorage.setItem('token', res.data.token);
                 localStorage.setItem('usuario', JSON.stringify(res.data.usuario));
-                console.log('Token guardado:', localStorage.getItem('token')); // ← Agregar log
-                navigate('/dashboard');
+
+                // Redirigir según el rol
+                if (res.data.usuario.rol === 'medico') {
+                    navigate('/dashboard-medico');
+                } else {
+                    navigate('/dashboard');
+                }
             }
         } catch (error) {
             console.error('Error de login:', error);

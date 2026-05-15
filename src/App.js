@@ -4,6 +4,7 @@ import Login from './pages/Login';
 import Registro from './pages/Registro';
 import Dashboard from './pages/Dashboard';
 import './App.css';
+import DashboardMedico from './pages/DashboardMedico';
 
 function App() {
     return (
@@ -13,6 +14,11 @@ function App() {
                 <Route path="/registro" element={<Registro />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/" element={<Navigate to="/login" />} />
+                <Route path="/dashboard-medico" element={
+                    <PrivateRoute>
+                        <DashboardMedico />
+                    </PrivateRoute>
+                } />
             </Routes>
         </BrowserRouter>
     );
