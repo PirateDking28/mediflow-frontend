@@ -16,7 +16,7 @@ function DashboardMedico() {
     useEffect(() => {
         const token = localStorage.getItem('token');
         const usuarioData = localStorage.getItem('usuario');
-        
+
         if (!token) {
             navigate('/login');
         } else {
@@ -95,7 +95,7 @@ function DashboardMedico() {
             </div>
 
             <h2>Citas de Hoy</h2>
-            
+
             {citas.length === 0 ? (
                 <p>No hay citas programadas para hoy</p>
             ) : (
@@ -104,7 +104,7 @@ function DashboardMedico() {
                         <div key={cita.id} className="cita-card">
                             <div className="cita-info">
                                 <h3>{cita.paciente_nombre}</h3>
-                                <p>Hora: {new Date(cita.fecha_hora).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                                <p>Hora: {cita.hora_mostrar || new Date(cita.fecha_hora).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                                 <p>Teléfono: {cita.paciente_telefono || 'No registrado'}</p>
                                 <p>Servicios: {cita.tiene_servicios > 0 ? '✅ Agregados' : '❌ Sin servicios'}</p>
                             </div>
@@ -124,7 +124,7 @@ function DashboardMedico() {
                 <div className="modal-overlay" onClick={() => setExpedienteVisible(false)}>
                     <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px' }}>
                         <h3>📋 Expediente de {pacienteSeleccionado?.nombre}</h3>
-                        
+
                         <h4>Notas médicas anteriores</h4>
                         {expedienteData.length === 0 ? (
                             <p>No hay notas médicas previas</p>
@@ -136,17 +136,17 @@ function DashboardMedico() {
                                 </div>
                             ))
                         )}
-                        
+
                         <h4>Agregar nota médica</h4>
-                        <textarea 
-                            rows="3" 
+                        <textarea
+                            rows="3"
                             placeholder="Escribir nota médica (diagnóstico, recetas, observaciones)..."
                             value={notaMedica}
                             onChange={e => setNotaMedica(e.target.value)}
                             style={{ width: '100%', marginBottom: '10px' }}
                         />
                         <button onClick={agregarNotaMedica} style={{ background: '#28a745' }}>Guardar Nota</button>
-                        
+
                         <button onClick={() => setExpedienteVisible(false)} style={{ marginTop: '15px', background: '#6c757d' }}>Cerrar</button>
                     </div>
                 </div>
