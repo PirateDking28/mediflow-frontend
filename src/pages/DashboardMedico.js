@@ -104,7 +104,8 @@ function DashboardMedico() {
                         <div key={cita.id} className="cita-card">
                             <div className="cita-info">
                                 <h3>{cita.paciente_nombre}</h3>
-                                <p>Hora: {cita.hora_mostrar || new Date(cita.fecha_hora).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                                <p>Hora: {cita.hora}</p>
+                                <p>Fecha: {cita.fecha}</p>
                                 <p>Teléfono: {cita.paciente_telefono || 'No registrado'}</p>
                                 <p>Servicios: {cita.tiene_servicios > 0 ? '✅ Agregados' : '❌ Sin servicios'}</p>
                             </div>
