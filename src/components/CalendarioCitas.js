@@ -3,14 +3,13 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import api from '../services/api';
 import './CalendarioCitas.css';
 
 function CalendarioCitas({ citas, recargarCitas }) {
+    const [eventos, setEventos] = useState([]);
+
     // Función para ajustar la hora local sin conversión UTC
     const ajustarHoraLocal = (fechaISO) => {
-        // La fecha viene como "2026-05-22T18:00:00.000Z"
-        // Extraer la parte de fecha y hora directamente
         const fecha = new Date(fechaISO);
         const año = fecha.getFullYear();
         const mes = fecha.getMonth();
@@ -24,7 +23,6 @@ function CalendarioCitas({ citas, recargarCitas }) {
 
     useEffect(() => {
         const eventosCalendario = citas.map(cita => {
-            // Usar la función para ajustar hora local
             const inicio = ajustarHoraLocal(cita.fecha_hora);
             const fin = new Date(inicio.getTime() + (cita.duracion || 30) * 60000);
 
@@ -44,9 +42,9 @@ function CalendarioCitas({ citas, recargarCitas }) {
         });
         setEventos(eventosCalendario);
     }, [citas]);
+
     const handleEventClick = (info) => {
-        // Mostrar detalles de la cita (solo información, no edición)
-        alert(`📋 Detalles de la cita:\n\nPaciente: ${info.event.extendedProps.paciente}\nMédico: ${info.event.extendedProps.medicano}\nDuración: ${info.event.extendedProps.duracion || 30} min\nEstado: ${info.event.backgroundColor === '#28a745' ? 'Activa' : 'Cancelada'}`);
+        alert(`📋 Detalles de la cita:\n\nPaciente: ${info.event.extendedProps.paciente}\nMédico: ${info.event.extendedProps.medico}\nDuración: ${info.event.extendedProps.duracion || 30} min`);
     };
 
     return (
@@ -60,7 +58,7 @@ function CalendarioCitas({ citas, recargarCitas }) {
                 }}
                 initialView="timeGridDay"
                 editable={false}
-                selectable={false}        // ← Deshabilitar selección de fechas
+                selectable={false}
                 dayMaxEvents={true}
                 weekends={true}
                 events={eventos}
@@ -77,4 +75,4 @@ function CalendarioCitas({ citas, recargarCitas }) {
     );
 }
 
-export default CalendarioCitas;
+export default CalendarioCitas;s
