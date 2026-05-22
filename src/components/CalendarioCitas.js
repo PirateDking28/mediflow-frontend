@@ -5,38 +5,32 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import './CalendarioCitas.css';
 
-function CalendarioCitas({ citas, recargarCitas }) {
+function CalendarioCitas({ citas }) {
     const [eventos, setEventos] = useState([]);
-
-    // Función para ajustar la hora local sin conversión UTC
-    const ajustarHoraLocal = (fechaISO) => {
-        const fecha = new Date(fechaISO);
-        const año = fecha.getFullYear();
-        const mes = fecha.getMonth();
-        const dia = fecha.getDate();
-        const hora = fecha.getHours();
-        const minutos = fecha.getMinutes();
-
-        // Crear fecha en zona horaria local sin conversión
-        return new Date(año, mes, dia, hora, minutos);
-    };
 
     useEffect(() => {
         const eventosCalendario = citas.map(cita => {
-            const inicio = ajustarHoraLocal(cita.fecha_hora);
+            // Crear fecha sin conversión de zona horaria
+            const fecha = new Date(cita.fecha_hora);
+            const inicio = new Date(
+                fecha.getFullYear(),
+                fecha.getMonth(),
+                fecha.getDate(),
+                fecha.getHours(),
+                fecha.getMinutes()
+            );
             const fin = new Date(inicio.getTime() + (cita.duracion || 30) * 60000);
-
+            
             return {
                 id: cita.id,
-                title: `${cita.paciente_nombre} - ${cita.medico_nombre}`,
+                title: cita.paciente_nombre + ' - ' + cita.medico_nombre,
                 start: inicio,
                 end: fin,
                 backgroundColor: cita.estado_cita === 'cancelada' ? '#dc3545' : '#28a745',
                 extendedProps: {
                     paciente: cita.paciente_nombre,
                     medico: cita.medico_nombre,
-                    duracion: cita.duracion,
-                    notas: cita.notas
+                    duracion: cita.duracion
                 }
             };
         });
@@ -44,7 +38,8 @@ function CalendarioCitas({ citas, recargarCitas }) {
     }, [citas]);
 
     const handleEventClick = (info) => {
-        alert(`📋 Detalles de la cita:\n\nPaciente: ${info.event.extendedProps.paciente}\nMédico: ${info.event.extendedProps.medico}\nDuración: ${info.event.extendedProps.duracion || 30} min`);
+        const props = info.event.extendedProps;
+        alert('📋 Detalles de la cita:\n\nPaciente: ' + props.paciente + '\nMédico: ' + props.medico + '\nDuración: ' + (props.duracion || 30) + ' min');
     };
 
     return (
@@ -75,4 +70,4 @@ function CalendarioCitas({ citas, recargarCitas }) {
     );
 }
 
-export default CalendarioCitas;s
+export default CalendarioCitas;
