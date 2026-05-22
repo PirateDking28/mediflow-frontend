@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import './Dashboard.css';
+import CalendarioCitas from '../components/CalendarioCitas';
 
 function Dashboard() {
     const [usuario, setUsuario] = useState(null);
@@ -11,6 +12,7 @@ function Dashboard() {
     const [servicios, setServicios] = useState([]);
     const [cargando, setCargando] = useState(true);
     const [creando, setCreando] = useState(false);
+    const [vistaCitas, setVistaCitas] = useState('lista');
 
     // Estados para búsqueda
     const [busquedaMedico, setBusquedaMedico] = useState('');
@@ -809,53 +811,67 @@ function Dashboard() {
             )}
 
             {/* Tabla de citas */}
-            <div className="table-container">
-                <h3>Próximas Citas</h3>
-                <table className="tabla tabla-citas">
-                    <thead>
-                        <tr>
-                            <th>Paciente</th>
-                            <th>Médico</th>
-                            <th>Fecha</th>
-                            <th>Hora</th>
-                            <th>Duración</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {citasPaginadas.length === 0 ? (
-                            <tr><td colSpan="7">No hay citas programadas</td></tr>
-                        ) : (
-                            citasPaginadas.map(cita => (
-                                <tr key={cita.id}>
-                                    <td>{cita.paciente_nombre}</td>
-                                    <td>{cita.medico_nombre}</td>
-                                    <td>{cita.fecha_hora ? cita.fecha_hora.split('T')[0] : '-'}</td>
-                                    <td>{cita.fecha_hora ? cita.fecha_hora.split('T')[1].substring(0, 5) : '-'}</td>
-                                    <td>{cita.duracion} min</td>
-                                    <td className={`estado ${cita.estado_cita}`}>{cita.estado_cita}</td>
-                                    <td>
-                                        <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
-                                            <button onClick={() => {
-                                                console.log('ID de cita:', cita.id);
-                                                abrirModalServicios(cita.id);
-                                            }} style={{ background: '#17a2b8' }}>📦</button>
-                                            {cita.estado_cita !== 'completada' && cita.estado_cita !== 'cancelada' && (
-                                                <button onClick={() => completarCita(cita.id)} style={{ background: '#28a745' }}>✅ Completar</button>
-                                            )}
-                                            {cita.estado_cita !== 'completada' && cita.estado_cita !== 'cancelada' && (
-                                                <button onClick={() => cancelarCita(cita.id)}>❌</button>
-                                            )}
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
-                {totalPaginasCitas > 1 && <div className="paginacion">...</div>}
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+                <button onClick={() => setVistaCitas('lista')} style={{ background: vistaCitas === 'lista' ? '#1a73e8' : '#ccc', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '5px', cursor: 'pointer' }}>
+                    📋 Lista
+                </button>
+                <button onClick={() => setVistaCitas('calendario')} style={{ background: vistaCitas === 'calendario' ? '#1a73e8' : '#ccc', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '5px', cursor: 'pointer' }}>
+                    📅 Calendario
+                </button>
             </div>
+            {vistaCitas === 'lista' ? (
+
+                <div className="table-container">
+                    <h3>Próximas Citas</h3>
+                    <table className="tabla tabla-citas">
+                        <thead>
+                            <tr>
+                                <th>Paciente</th>
+                                <th>Médico</th>
+                                <th>Fecha</th>
+                                <th>Hora</th>
+                                <th>Duración</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {citasPaginadas.length === 0 ? (
+                                <tr><td colSpan="7">No hay citas programadas</td></tr>
+                            ) : (
+                                citasPaginadas.map(cita => (
+                                    <tr key={cita.id}>
+                                        <td>{cita.paciente_nombre}</td>
+                                        <td>{cita.medico_nombre}</td>
+                                        <td>{cita.fecha_hora ? cita.fecha_hora.split('T')[0] : '-'}</td>
+                                        <td>{cita.fecha_hora ? cita.fecha_hora.split('T')[1].substring(0, 5) : '-'}</td>
+                                        <td>{cita.duracion} min</td>
+                                        <td className={`estado ${cita.estado_cita}`}>{cita.estado_cita}</td>
+                                        <td>
+                                            <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+                                                <button onClick={() => {
+                                                    console.log('ID de cita:', cita.id);
+                                                    abrirModalServicios(cita.id);
+                                                }} style={{ background: '#17a2b8' }}>📦</button>
+                                                {cita.estado_cita !== 'completada' && cita.estado_cita !== 'cancelada' && (
+                                                    <button onClick={() => completarCita(cita.id)} style={{ background: '#28a745' }}>✅ Completar</button>
+                                                )}
+                                                {cita.estado_cita !== 'completada' && cita.estado_cita !== 'cancelada' && (
+                                                    <button onClick={() => cancelarCita(cita.id)}>❌</button>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                    {totalPaginasCitas > 1 && <div className="paginacion">...</div>}
+                </div>
+            ) : (
+                <CalendarioCitas citas={citas} recargarCitas={cargarCitas} />
+            )}
+
 
             {/* Modal de Editar Deuda */}
             {showModalEditarDeuda && (
