@@ -26,15 +26,9 @@ function CalendarioCitas({ citas, recargarCitas }) {
         setEventos(eventosCalendario);
     }, [citas]);
 
-    const handleDateClick = (info) => {
-        // Abrir modal para crear cita en la fecha/hora seleccionada
-        alert(`Crear cita para: ${info.dateStr}`);
-        // Aquí se abriría el formulario de cita
-    };
-
     const handleEventClick = (info) => {
-        // Mostrar detalles de la cita
-        alert(`Cita: ${info.event.title}\nPaciente: ${info.event.extendedProps.paciente}\nMédico: ${info.event.extendedProps.medico}`);
+        // Mostrar detalles de la cita (solo información, no edición)
+        alert(`📋 Detalles de la cita:\n\nPaciente: ${info.event.extendedProps.paciente}\nMédico: ${info.event.extendedProps.medicano}\nDuración: ${info.event.extendedProps.duracion || 30} min\nEstado: ${info.event.backgroundColor === '#28a745' ? 'Activa' : 'Cancelada'}`);
     };
 
     return (
@@ -48,12 +42,10 @@ function CalendarioCitas({ citas, recargarCitas }) {
                 }}
                 initialView="timeGridDay"
                 editable={false}
-                selectable={true}
-                selectMirror={true}
+                selectable={false}        // ← Deshabilitar selección de fechas
                 dayMaxEvents={true}
                 weekends={true}
                 events={eventos}
-                dateClick={handleDateClick}
                 eventClick={handleEventClick}
                 locale="es"
                 buttonText={{
