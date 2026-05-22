@@ -10,6 +10,7 @@ function Dashboard() {
     const [citas, setCitas] = useState([]);
     const [servicios, setServicios] = useState([]);
     const [cargando, setCargando] = useState(true);
+    const [creando, setCreando] = useState(false);
 
     // Estados para búsqueda
     const [busquedaMedico, setBusquedaMedico] = useState('');
@@ -420,6 +421,9 @@ function Dashboard() {
     // ========== PACIENTES ==========
     const handleCrearPaciente = async (e) => {
         e.preventDefault();
+        if (creando) return; // Evita múltiples clics
+
+        setCreando(true);
         try {
             await api.post('/pacientes', formPaciente);
             alert('Paciente creado exitosamente');
@@ -429,6 +433,8 @@ function Dashboard() {
         } catch (error) {
             console.error(error);
             alert(error.response?.data?.error || 'Error al crear paciente');
+        } finally {
+            setCreando(false);
         }
     };
 
@@ -1175,7 +1181,9 @@ function Dashboard() {
                         <input type="text" placeholder="Teléfono" value={formPaciente.telefono} onChange={e => setFormPaciente({ ...formPaciente, telefono: e.target.value })} />
                         <input type="date" value={formPaciente.fecha_nacimiento} onChange={e => setFormPaciente({ ...formPaciente, fecha_nacimiento: e.target.value })} max={new Date().toISOString().split('T')[0]} />
                         <input type="text" placeholder="Dirección" value={formPaciente.direccion} onChange={e => setFormPaciente({ ...formPaciente, direccion: e.target.value })} />
-                        <button type="submit">Crear Paciente</button>
+                        <button type="submit" disabled={creando}>
+                            {creando ? 'Creando...' : 'Crear Paciente'}
+                        </button>
                     </form>
                 </div>
             )}
