@@ -7,6 +7,8 @@ import DashboardMedico from './pages/DashboardMedico';
 import PrivateRoute from './components/PrivateRoute';
 import './App.css';
 import VerificarEmail from './pages/VerificarEmail';
+import RecuperarPassword from './pages/RecuperarPassword';
+import RestablecerPassword from './pages/RestablecerPassword';
 
 
 function App() {
@@ -27,6 +29,8 @@ function App() {
                 } />
                 <Route path="/" element={<Navigate to="/login" />} />
                 <Route path="/verificar/:token" element={<VerificarEmail />} />
+                <Route path="/recuperar" element={<RecuperarPassword />} />
+                <Route path="/restablecer/:token" element={<RestablecerPassword />} />
             </Routes>
         </BrowserRouter>
     );

@@ -49,6 +49,9 @@ function Login() {
                 <button type="submit" disabled={cargando}>{cargando ? 'Cargando...' : 'Ingresar'}</button>
             </form>
             <p>¿No tienes cuenta? <Link to="/registro">Regístrate aquí</Link></p>
+            <p>
+                <Link to="/recuperar">¿Olvidaste tu contraseña?</Link>
+            </p>
         </div>
     );
 }
