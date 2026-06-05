@@ -521,7 +521,8 @@ function Dashboard() {
             const payload = {
                 paciente_id: formCita.paciente_id,
                 medico_id: formCita.medico_id,
-                fecha_hora: fechaHoraStr,
+                fecha: formCita.fecha,
+                hora: formCita.hora,
                 duracion: formCita.duracion,
                 notas: formCita.notas
             };
